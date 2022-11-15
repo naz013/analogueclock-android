@@ -27,33 +27,20 @@ class ClockView constructor(
     defStyleRes: Int
 ) : View(context, attrs, defStyleAttr, defStyleRes) {
 
-    private var mClockRect: Rect? = null
-    private val mInnerCirclesRects: Array<Rect?> = arrayOfNulls<Rect>(2)
-    private val mHourArrow: Path = Path()
-    private val mMinuteArrow: Path = Path()
-    private val mSecondArrow: Path = Path()
-    private val mLabelPoints: Array<Point?> = arrayOfNulls<Point>(4)
+    private var _time: ClockTime = ClockTime()
+    private var _colors: ClockColors = ClockColors()
+    private var _params: ClockParams = ClockParams()
 
-    @ColorInt
-    private var mBgColor: Int = Color.WHITE
-    private var mCirclesColor: Int = Color.BLACK
-    private var mArrowsColor: Int = Color.BLACK
-    private var mHourLabelsColor: Int = Color.BLACK
-    private var mShadowColor: Int = Color.RED
+    private var _clockRect: Rect? = null
+    private val _hourTick: Path = Path()
+    private val _minuteTick: Path = Path()
+    private val _secondTick: Path = Path()
+    private val _labelPoints: Array<Point?> = arrayOfNulls(4)
 
-    private var mShowHourLabels = true
-    private var mShowCircles = true
-    private var mShowShadow = true
-
-    private var mHour = 3
-    private var mMinute = 0
-    private var mSecond = 0
-
-    private val mBgPaint: Paint = Paint()
-    private val mShadowPaint: Paint = Paint()
-    private val mLabelPaint: Paint = Paint()
-    private val mArrowPaint: Paint = Paint()
-    private val mCirclePaint: Paint = Paint()
+    private val _backgroundPaint: Paint = Paint()
+    private val _shadowPaint: Paint = Paint()
+    private val _labelPaint: Paint = Paint()
+    private val _tickPaint: Paint = Paint()
 
     init {
         initView(context, attrs, defStyleAttr)
@@ -70,73 +57,16 @@ class ClockView constructor(
         0
     )
 
-    fun setShowHourLabels(showHourLabels: Boolean) {
-        mShowHourLabels = showHourLabels
-        this.invalidate()
-    }
-
-    fun isShowHourLabels(): Boolean {
-        return mShowHourLabels
-    }
-
-    fun setShowCircles(showCircles: Boolean) {
-        mShowCircles = showCircles
-        this.invalidate()
-    }
-
-    fun isShowCircles(): Boolean {
-        return mShowShadow
-    }
-
-    fun setShowShadow(showShadow: Boolean) {
-        mShowShadow = showShadow
-        this.invalidate()
-    }
-
-    fun isShowShadow(): Boolean {
-        return mShowShadow
-    }
-
-    fun setBgColor(@ColorInt bgColor: Int) {
-        mBgColor = bgColor
-        mShadowPaint.color = bgColor
-        this.invalidate()
-    }
-
-    fun setCirclesColor(@ColorInt circlesColor: Int) {
-        mCirclesColor = circlesColor
-        mCirclePaint.color = circlesColor
-        this.invalidate()
-    }
-
-    fun setArrowsColor(@ColorInt arrowsColor: Int) {
-        mArrowsColor = arrowsColor
-        mArrowPaint.color = arrowsColor
-        this.invalidate()
-    }
-
-    fun setHourLabelsColor(@ColorInt hourLabelsColor: Int) {
-        mHourLabelsColor = hourLabelsColor
-        mShadowPaint.color = hourLabelsColor
-        this.invalidate()
-    }
-
-    fun setShadowColor(@ColorInt shadowColor: Int) {
-        mShadowColor = shadowColor
-        mShadowPaint.color = shadowColor
-        this.invalidate()
-    }
-
-    fun getTime(): Long {
+    fun getTimeMillis(): Long {
         val calendar: Calendar = Calendar.getInstance()
         calendar.timeInMillis = System.currentTimeMillis()
-        calendar.set(Calendar.HOUR_OF_DAY, mHour)
-        calendar.set(Calendar.MINUTE, mMinute)
-        calendar.set(Calendar.SECOND, mSecond)
+        calendar.set(Calendar.HOUR_OF_DAY, _time.hour)
+        calendar.set(Calendar.MINUTE, _time.minute)
+        calendar.set(Calendar.SECOND, _time.second)
         return calendar.timeInMillis
     }
 
-    fun setTimeMillis(millis: Long) {
+    fun setMillis(millis: Long) {
         initTime(millis)
         this.invalidate()
     }
@@ -146,48 +76,40 @@ class ClockView constructor(
     }
 
     fun setTime(hourOfDay: Int, minute: Int, second: Int) {
-        mHour = hourOfDay
-        mMinute = minute
-        mSecond = second
+        _time = ClockTime(hourOfDay, minute, second)
         this.invalidate()
     }
 
     private fun initView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) {
         initTime(System.currentTimeMillis())
         val textSize = 25f
-        mShadowPaint.isAntiAlias = true
-        mShadowPaint.color = mShadowColor
-        mShadowPaint.maskFilter = BlurMaskFilter(
+        _shadowPaint.isAntiAlias = true
+        _shadowPaint.maskFilter = BlurMaskFilter(
             dp2px(SHADOW_RADIUS).toFloat(),
             BlurMaskFilter.Blur.OUTER
         )
-        mShadowPaint.style = Paint.Style.FILL
-        setLayerType(LAYER_TYPE_HARDWARE, mShadowPaint)
+        _shadowPaint.style = Paint.Style.FILL
+        setLayerType(LAYER_TYPE_HARDWARE, _shadowPaint)
 
-        mArrowPaint.isAntiAlias = true
-        mArrowPaint.color = mArrowsColor
-        mArrowPaint.style = Paint.Style.FILL
+        _tickPaint.isAntiAlias = true
+        _tickPaint.style = Paint.Style.FILL
 
-        mLabelPaint.isAntiAlias = true
-        mLabelPaint.color = mHourLabelsColor
-        mLabelPaint.style = Paint.Style.FILL_AND_STROKE
-        mLabelPaint.textSize = textSize
+        _labelPaint.isAntiAlias = true
+        _labelPaint.style = Paint.Style.FILL_AND_STROKE
+        _labelPaint.textSize = textSize
 
-        mCirclePaint.isAntiAlias = true
-        mCirclePaint.color = mCirclesColor
-        mCirclePaint.style = Paint.Style.STROKE
-
-        mBgPaint.isAntiAlias = true
-        mBgPaint.color = mBgColor
-        mBgPaint.style = Paint.Style.FILL
+        _backgroundPaint.isAntiAlias = true
+        _backgroundPaint.style = Paint.Style.FILL
     }
 
     private fun initTime(millis: Long) {
         val calendar: Calendar = Calendar.getInstance()
         calendar.timeInMillis = millis
-        mHour = calendar.get(Calendar.HOUR_OF_DAY)
-        mMinute = calendar.get(Calendar.MINUTE)
-        mSecond = calendar.get(Calendar.SECOND)
+        _time = ClockTime(
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            calendar.get(Calendar.SECOND)
+        )
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -197,146 +119,143 @@ class ClockView constructor(
         if (canvas == null) return
         val millis = System.currentTimeMillis()
 //        canvas?.drawColor(Color.RED)
-        if (mShowShadow) {
+        if (_params.showShadow) {
             drawClockShadow(canvas)
         }
         drawClockBackground(canvas)
-        if (mShowCircles) {
-            drawInnerCircles(canvas)
-        }
-        if (mShowHourLabels) {
+        if (_params.showHourLabels) {
             drawHourLabels(canvas)
         }
         drawHourArrow(canvas)
         drawMinuteArrow(canvas)
-        drawSecondArrow(canvas)
+        if (_params.showSecondsTick) {
+            drawSecondArrow(canvas)
+        }
         log("onDraw: duration=${System.currentTimeMillis() - millis}")
     }
 
     private fun drawSecondArrow(canvas: Canvas) {
-        mClockRect?.takeIf { !mSecondArrow.isEmpty }
+        _clockRect?.takeIf { !_secondTick.isEmpty }
             ?.also { rect ->
                 canvas.save()
                 canvas.rotate(secondAngle(), rect.centerXf(), rect.centerYf())
-                canvas.drawPath(mSecondArrow, mArrowPaint)
+                _tickPaint.color = _colors.secondsTickColor
+                canvas.drawPath(_secondTick, _tickPaint)
                 canvas.restore()
             }
     }
 
     private fun drawMinuteArrow(canvas: Canvas) {
-        mClockRect?.takeIf { !mMinuteArrow.isEmpty }
+        _clockRect?.takeIf { !_minuteTick.isEmpty }
             ?.also { rect ->
                 canvas.save()
                 canvas.rotate(minuteAngle(), rect.centerXf(), rect.centerYf())
-                canvas.drawPath(mMinuteArrow, mArrowPaint)
+                _tickPaint.color = _colors.minuteTickColor
+                canvas.drawPath(_minuteTick, _tickPaint)
                 canvas.restore()
             }
     }
 
     private fun drawHourArrow(canvas: Canvas) {
-        mClockRect?.takeIf { !mHourArrow.isEmpty }
+        _clockRect?.takeIf { !_hourTick.isEmpty }
             ?.also { rect ->
                 canvas.save()
                 canvas.rotate(hourAngle(), rect.centerXf(), rect.centerYf())
-                canvas.drawPath(mHourArrow, mArrowPaint)
+                _tickPaint.color = _colors.hourTickColor
+                canvas.drawPath(_hourTick, _tickPaint)
                 canvas.restore()
             }
     }
 
     private fun drawHourLabels(canvas: Canvas) {
-        var p: Point? = mLabelPoints[0]
+        var p: Point? = _labelPoints[0]
         if (p != null) {
             drawText(canvas, p, "12")
         }
-        p = mLabelPoints[1]
+        p = _labelPoints[1]
         if (p != null) {
             drawText(canvas, p, "3")
         }
-        p = mLabelPoints[2]
+        p = _labelPoints[2]
         if (p != null) {
             drawText(canvas, p, "6")
         }
-        p = mLabelPoints[3]
+        p = _labelPoints[3]
         if (p != null) {
             drawText(canvas, p, "9")
         }
     }
 
-    private fun drawInnerCircles(canvas: Canvas) {
-        for (rect in mInnerCirclesRects) {
-            if (rect != null) {
-                canvas.drawCircle(rect.centerXf(), rect.centerYf(), rect.width() / 2f, mCirclePaint)
-            }
-        }
-    }
-
     private fun drawClockBackground(canvas: Canvas) {
-        mClockRect?.also { rect ->
+        _clockRect?.also { rect ->
+            _backgroundPaint.color = _colors.clockColor
             canvas.drawCircle(
                 rect.centerXf(),
                 rect.centerYf(),
                 rect.width() / 2f,
-                mBgPaint
+                _backgroundPaint
             )
         }
     }
 
     private fun drawClockShadow(canvas: Canvas) {
-        mClockRect?.also { rect ->
+        _clockRect?.also { rect ->
+            _shadowPaint.color = _colors.shadowColor
             canvas.drawCircle(
                 rect.centerXf(),
                 rect.centerYf(),
                 rect.width() / 2f,
-                mShadowPaint
+                _shadowPaint
             )
         }
     }
 
     private fun drawText(canvas: Canvas, p: Point, text: String) {
         val r = Rect()
-        mLabelPaint.textAlign = Paint.Align.LEFT
-        mLabelPaint.getTextBounds(text, 0, text.length, r)
+        _labelPaint.textAlign = Paint.Align.LEFT
+        _labelPaint.getTextBounds(text, 0, text.length, r)
+        _labelPaint.color = _colors.labelsColor
         val x: Float = p.x - r.width() / 2f - r.left
         val y: Float = p.y + r.height() / 2f - r.bottom
-        canvas.drawText(text, x, y, mLabelPaint)
+        canvas.drawText(text, x, y, _labelPaint)
     }
 
     private fun hourAngle(): Float {
         var angle = 0.0f
-        var hour = mHour
+        var hour = _time.hour
         if (validateValue(hour, 0, 23)) {
             if (hour > 11) {
                 hour -= 12
             }
             var minutes = hourToMinutes(hour)
-            if (validateValue(mMinute, 0, 59)) {
-                minutes += mMinute
+            if (validateValue(_time.minute, 0, 59)) {
+                minutes += _time.minute
             }
             angle = minutes.toFloat() * 0.5f
         }
-        log("hourAngle: angle=$angle, hour=$mHour")
+        log("hourAngle: angle=$angle, hour=${_time.hour}")
         return angle
     }
 
     private fun minuteAngle(): Float {
-        if (mMinute == 0) return 0.0f
+        if (_time.minute == 0) return 0.0f
         var angle = 0.0f
-        val minute = mMinute
+        val minute = _time.minute
         if (validateValue(minute, 0, 59)) {
             angle = minute.toFloat() * 6f
         }
-        log("minuteAngle: angle=$angle, minute=$mMinute")
+        log("minuteAngle: angle=$angle, minute=${_time.minute}")
         return angle
     }
 
     private fun secondAngle(): Float {
-        if (mSecond == 0) return 0.0f
+        if (_time.second == 0) return 0.0f
         var angle = 0.0f
-        val second = mSecond
+        val second = _time.second
         if (validateValue(second, 0, 59)) {
             angle = second.toFloat() * 6f
         }
-        log("secondAngle: angle=$angle, minute=$mSecond")
+        log("secondAngle: angle=$angle, minute=${_time.second}")
         return angle
     }
 
@@ -352,26 +271,16 @@ class ClockView constructor(
         if (width <= 0) return
         val margin = (width.toFloat() * 0.05f / 2f).toInt()
         val clockRect = Rect(margin, margin, width - margin, width - margin)
-        mClockRect = clockRect
+        _clockRect = clockRect
 
-        log("processCalculations: clockRect=$mClockRect")
+        log("processCalculations: clockRect=$_clockRect")
 
-        val middleCircleMargin = (clockRect.widthF() * 0.33f / 2f).toInt()
-        val smallCircleMargin = (clockRect.widthF() * 0.66f / 2f).toInt()
-        mInnerCirclesRects[0] = Rect(
-            clockRect.left + middleCircleMargin, clockRect.top + middleCircleMargin,
-            clockRect.right - middleCircleMargin, clockRect.bottom - middleCircleMargin
-        )
-        mInnerCirclesRects[1] = Rect(
-            clockRect.left + smallCircleMargin, clockRect.top + smallCircleMargin,
-            clockRect.right - smallCircleMargin, clockRect.bottom - smallCircleMargin
-        )
         val mLabelLength = (clockRect.widthF() * 0.85f / 2f).toInt()
-        mLabelPoints[0] =
+        _labelPoints[0] =
             circlePoint(clockRect.centerX(), clockRect.centerY(), mLabelLength, 270f)
-        mLabelPoints[1] = circlePoint(clockRect.centerX(), clockRect.centerY(), mLabelLength, 0f)
-        mLabelPoints[2] = circlePoint(clockRect.centerX(), clockRect.centerY(), mLabelLength, 90f)
-        mLabelPoints[3] =
+        _labelPoints[1] = circlePoint(clockRect.centerX(), clockRect.centerY(), mLabelLength, 0f)
+        _labelPoints[2] = circlePoint(clockRect.centerX(), clockRect.centerY(), mLabelLength, 90f)
+        _labelPoints[3] =
             circlePoint(clockRect.centerX(), clockRect.centerY(), mLabelLength, 180f)
         val mHourArrowWidth = (clockRect.widthF() * HOUR_ARROW_WIDTH).toInt()
         val mHourArrowLength = (clockRect.widthF() / 2f * HOUR_ARROW_LENGTH).toInt()
@@ -380,21 +289,21 @@ class ClockView constructor(
         val mSecondArrowWidth = (clockRect.widthF() * SECOND_ARROW_WIDTH).toInt()
         val mSecondArrowLength = (clockRect.widthF() / 2f * SECOND_ARROW_LENGTH).toInt()
         create(
-            mSecondArrow,
+            _secondTick,
             clockRect.centerX(),
             clockRect.centerY(),
             mSecondArrowWidth,
             mSecondArrowLength
         )
         create(
-            mMinuteArrow,
+            _minuteTick,
             clockRect.centerX(),
             clockRect.centerY(),
             mMinuteArrowWidth,
             mMinuteArrowLength
         )
         create(
-            mHourArrow,
+            _hourTick,
             clockRect.centerX(),
             clockRect.centerY(),
             mHourArrowWidth,
@@ -466,3 +375,24 @@ private fun Rect.centerXf(): Float {
 private fun Rect.centerYf(): Float {
     return centerY().toFloat()
 }
+
+data class ClockParams(
+    val showHourLabels: Boolean = false,
+    val showShadow: Boolean = false,
+    val showSecondsTick: Boolean = true
+)
+
+data class ClockColors(
+    @ColorInt val clockColor: Int = Color.LTGRAY,
+    @ColorInt val hourTickColor: Int = Color.RED,
+    @ColorInt val minuteTickColor: Int = Color.GREEN,
+    @ColorInt val secondsTickColor: Int = Color.BLUE,
+    @ColorInt val labelsColor: Int = Color.BLACK,
+    @ColorInt val shadowColor: Int = Color.BLACK
+)
+
+internal data class ClockTime(
+    val hour: Int = 0,
+    val minute: Int = 0,
+    val second: Int = 0
+)
