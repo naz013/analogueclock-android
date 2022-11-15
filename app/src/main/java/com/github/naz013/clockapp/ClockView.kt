@@ -20,17 +20,12 @@ import java.util.Calendar
 import kotlin.math.cos
 import kotlin.math.sin
 
-
-class ClockView : View {
-
-    private val TAG = "ClockView"
-    private val SHADOW_RADIUS = 15
-    private val HOUR_ARROW_WIDTH = 0.05f
-    private val MINUTE_ARROW_WIDTH = 0.03f
-    private val SECOND_ARROW_WIDTH = 0.02f
-    private val HOUR_ARROW_LENGTH = 0.55f
-    private val MINUTE_ARROW_LENGTH = 0.75f
-    private val SECOND_ARROW_LENGTH = 0.35f
+class ClockView constructor(
+    context: Context?,
+    attrs: AttributeSet?,
+    defStyleAttr: Int,
+    defStyleRes: Int
+) : View(context, attrs, defStyleAttr, defStyleRes) {
 
     private var mClockRect: Rect? = null
     private val mInnerCirclesRects: Array<Rect?> = arrayOfNulls<Rect>(2)
@@ -41,14 +36,11 @@ class ClockView : View {
 
     @ColorInt
     private var mBgColor: Int = Color.WHITE
-    private var mCirclesColor: Int = Color.DKGRAY
-    private var mArrowsColor: Int = Color.DKGRAY
-    private var mHourLabelsColor: Int = Color.DKGRAY
-    private var mShadowColor: Int = Color.parseColor("#20000000")
+    private var mCirclesColor: Int = Color.BLACK
+    private var mArrowsColor: Int = Color.BLACK
+    private var mHourLabelsColor: Int = Color.BLACK
+    private var mShadowColor: Int = Color.RED
 
-    private var mShowHourArrow = true
-    private var mShowMinuteArrow = true
-    private var mShowSecondArrow = false
     private var mShowHourLabels = true
     private var mShowCircles = true
     private var mShowShadow = true
@@ -63,40 +55,20 @@ class ClockView : View {
     private val mArrowPaint: Paint = Paint()
     private val mCirclePaint: Paint = Paint()
 
-    constructor(context: Context) : this(context, null)
-
-    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+    init {
         initView(context, attrs, defStyleAttr)
     }
 
-    fun setShowHourArrow(showHourArrow: Boolean) {
-        mShowHourArrow = showHourArrow
-        this.invalidate()
-    }
+    constructor(context: Context?) : this(context, null)
 
-    fun isShowHourArrow(): Boolean {
-        return mShowHourArrow
-    }
+    constructor(context: Context?, attrs: AttributeSet?) : this(context, attrs, 0)
 
-    fun setShowMinuteArrow(showMinuteArrow: Boolean) {
-        mShowMinuteArrow = showMinuteArrow
-        this.invalidate()
-    }
-
-    fun isShowMinuteArrow(): Boolean {
-        return mShowMinuteArrow
-    }
-
-    fun setShowSecondArrow(showSecondArrow: Boolean) {
-        mShowSecondArrow = showSecondArrow
-        this.invalidate()
-    }
-
-    fun isShowSecondArrow(): Boolean {
-        return mShowSecondArrow
-    }
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : this(
+        context,
+        attrs,
+        defStyleAttr,
+        0
+    )
 
     fun setShowHourLabels(showHourLabels: Boolean) {
         mShowHourLabels = showHourLabels
@@ -180,7 +152,7 @@ class ClockView : View {
         this.invalidate()
     }
 
-    private fun initView(context: Context, attrs: AttributeSet?, defStyleAttr: Int) {
+    private fun initView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) {
         initTime(System.currentTimeMillis())
         val textSize = 25f
         mShadowPaint.isAntiAlias = true
@@ -190,17 +162,21 @@ class ClockView : View {
             BlurMaskFilter.Blur.OUTER
         )
         mShadowPaint.style = Paint.Style.FILL
-        setLayerType(LAYER_TYPE_SOFTWARE, mShadowPaint)
+        setLayerType(LAYER_TYPE_HARDWARE, mShadowPaint)
+
         mArrowPaint.isAntiAlias = true
         mArrowPaint.color = mArrowsColor
         mArrowPaint.style = Paint.Style.FILL
+
         mLabelPaint.isAntiAlias = true
         mLabelPaint.color = mHourLabelsColor
         mLabelPaint.style = Paint.Style.FILL_AND_STROKE
-        mLabelPaint.setTextSize(textSize)
+        mLabelPaint.textSize = textSize
+
         mCirclePaint.isAntiAlias = true
         mCirclePaint.color = mCirclesColor
         mCirclePaint.style = Paint.Style.STROKE
+
         mBgPaint.isAntiAlias = true
         mBgPaint.color = mBgColor
         mBgPaint.style = Paint.Style.FILL
@@ -214,9 +190,13 @@ class ClockView : View {
         mSecond = calendar.get(Calendar.SECOND)
     }
 
-    override fun onDraw(canvas: Canvas) {
+    override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
+        log("onDraw: canvas=$canvas")
+        log("onDraw: w=$width, h=$height")
+        if (canvas == null) return
         val millis = System.currentTimeMillis()
+//        canvas?.drawColor(Color.RED)
         if (mShowShadow) {
             drawClockShadow(canvas)
         }
@@ -227,16 +207,10 @@ class ClockView : View {
         if (mShowHourLabels) {
             drawHourLabels(canvas)
         }
-        if (mShowHourArrow) {
-            drawHourArrow(canvas)
-        }
-        if (mShowMinuteArrow) {
-            drawMinuteArrow(canvas)
-        }
-        if (mShowSecondArrow) {
-            drawSecondArrow(canvas)
-        }
-        Log.d(TAG, "onDraw: " + (System.currentTimeMillis() - millis))
+        drawHourArrow(canvas)
+        drawMinuteArrow(canvas)
+        drawSecondArrow(canvas)
+        log("onDraw: duration=${System.currentTimeMillis() - millis}")
     }
 
     private fun drawSecondArrow(canvas: Canvas) {
@@ -340,7 +314,7 @@ class ClockView : View {
             }
             angle = minutes.toFloat() * 0.5f
         }
-        Log.d(TAG, "hourAngle: $angle")
+        log("hourAngle: angle=$angle, hour=$mHour")
         return angle
     }
 
@@ -351,7 +325,7 @@ class ClockView : View {
         if (validateValue(minute, 0, 59)) {
             angle = minute.toFloat() * 6f
         }
-        Log.d(TAG, "minuteAngle: $angle")
+        log("minuteAngle: angle=$angle, minute=$mMinute")
         return angle
     }
 
@@ -362,15 +336,16 @@ class ClockView : View {
         if (validateValue(second, 0, 59)) {
             angle = second.toFloat() * 6f
         }
-        Log.d(TAG, "secondAngle: $angle")
+        log("secondAngle: angle=$angle, minute=$mSecond")
         return angle
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val width = MeasureSpec.getSize(widthMeasureSpec)
-        super.onMeasure(widthMeasureSpec, widthMeasureSpec)
-        setMeasuredDimension(width, width)
-        processCalculations(width)
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        val measuredWidth = measuredWidth
+        setMeasuredDimension(measuredWidth, measuredWidth)
+        log("onMeasure: width=$measuredWidth, height=$measuredHeight")
+        processCalculations(measuredWidth)
     }
 
     private fun processCalculations(width: Int) {
@@ -378,6 +353,9 @@ class ClockView : View {
         val margin = (width.toFloat() * 0.05f / 2f).toInt()
         val clockRect = Rect(margin, margin, width - margin, width - margin)
         mClockRect = clockRect
+
+        log("processCalculations: clockRect=$mClockRect")
+
         val middleCircleMargin = (clockRect.widthF() * 0.33f / 2f).toInt()
         val smallCircleMargin = (clockRect.widthF() * 0.66f / 2f).toInt()
         mInnerCirclesRects[0] = Rect(
@@ -459,6 +437,21 @@ class ClockView : View {
 
     private fun validateValue(value: Int, from: Int, to: Int): Boolean {
         return value in from..to
+    }
+
+    private fun log(message: String) {
+        Log.d(TAG, message)
+    }
+
+    companion object {
+        private const val TAG = "ClockView"
+        private const val SHADOW_RADIUS = 15
+        private const val HOUR_ARROW_WIDTH = 0.05f
+        private const val MINUTE_ARROW_WIDTH = 0.03f
+        private const val SECOND_ARROW_WIDTH = 0.02f
+        private const val HOUR_ARROW_LENGTH = 0.55f
+        private const val MINUTE_ARROW_LENGTH = 0.75f
+        private const val SECOND_ARROW_LENGTH = 0.35f
     }
 }
 
