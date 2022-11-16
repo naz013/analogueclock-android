@@ -7,4 +7,19 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="background">#FFFFFFFF</color>
+
+    <color name="clock_background">#FFFFFFFF</color>
+    <color name="clock_seconds_tick">#FFA5A6</color>
+    <color name="clock_minute_tick">#B3BFD8</color>
+    <color name="clock_hour_tick">#E5E9F2</color>
+    <color name="clock_pin">#ECEFF6</color>
+    <color name="clock_pin_circle">#FFFEFF</color>
+
+    <color name="theme_switch">#FF9E95</color>
+
+    <color name="text_primary">#101113</color>
+    <color name="text_secondary">#4D4E4E</color>
+    <color name="text_tertiary">#ACBBD0</color>
 </resources>

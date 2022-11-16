@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ClockView">
+        <attr name="clock_backgroundColor" format="color" />
+        <attr name="clock_secondsTickColor" format="color" />
+        <attr name="clock_minuteTickColor" format="color" />
+        <attr name="clock_hourTickColor" format="color" />
+        <attr name="clock_innerCircleColor" format="color" />
+        <attr name="clock_pinColor" format="color" />
+        <attr name="clock_labelsColor" format="color" />
+
+        <attr name="clock_showSecondsTick" format="boolean" />
+        <attr name="clock_showShadow" format="boolean" />
+        <attr name="clock_showHourLabel" format="boolean" />
+
+        <attr name="clock_innerCircleSize" format="float" />
+        <attr name="clock_hourTickWidth" format="float" />
+        <attr name="clock_minuteTickWidth" format="float" />
+        <attr name="clock_secondsTickWidth" format="float" />
+    </declare-styleable>
+</resources>

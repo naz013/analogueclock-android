@@ -1,6 +1,7 @@
 package com.github.naz013.clockapp
 
 import android.content.Context
+import android.content.res.TypedArray
 import android.graphics.BlurMaskFilter
 import android.graphics.Canvas
 import android.graphics.Color
@@ -36,11 +37,15 @@ class ClockView constructor(
     private val _minuteTick: Path = Path()
     private val _secondTick: Path = Path()
     private val _labelPoints: Array<Point?> = arrayOfNulls(4)
+    private var _innerCircleRadius: Float = 5f
+    private var _pinRadius: Float = 1f
 
     private val _backgroundPaint: Paint = Paint()
     private val _shadowPaint: Paint = Paint()
     private val _labelPaint: Paint = Paint()
     private val _tickPaint: Paint = Paint()
+    private val _innerCirclePaint: Paint = Paint()
+    private val _pinPaint: Paint = Paint()
 
     init {
         initView(context, attrs, defStyleAttr)
@@ -83,6 +88,36 @@ class ClockView constructor(
     private fun initView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) {
         initTime(System.currentTimeMillis())
         val textSize = 25f
+
+        if (attrs != null && context != null) {
+            val a: TypedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.ClockView, defStyleAttr, 0)
+            try {
+                _params = _params.copy(
+                    showHourLabels = a.getBoolean(R.styleable.ClockView_clock_showHourLabel, _params.showHourLabels),
+                    showSecondsTick = a.getBoolean(R.styleable.ClockView_clock_showSecondsTick, _params.showSecondsTick),
+                    showShadow = a.getBoolean(R.styleable.ClockView_clock_showShadow, _params.showShadow),
+                    pinCircleSize = a.getFloat(R.styleable.ClockView_clock_innerCircleSize, _params.pinCircleSize),
+                    secondTickWidth = a.getFloat(R.styleable.ClockView_clock_secondsTickWidth, _params.secondTickWidth),
+                    minuteTickWidth = a.getFloat(R.styleable.ClockView_clock_minuteTickWidth, _params.minuteTickWidth),
+                    hourTickWidth = a.getFloat(R.styleable.ClockView_clock_hourTickWidth, _params.hourTickWidth)
+                )
+
+                _colors = _colors.copy(
+                    clockColor = a.getColor(R.styleable.ClockView_clock_backgroundColor, _colors.clockColor),
+                    pinColor = a.getColor(R.styleable.ClockView_clock_pinColor, _colors.pinColor),
+                    innerCircleColor = a.getColor(R.styleable.ClockView_clock_innerCircleColor, _colors.innerCircleColor),
+                    secondsTickColor = a.getColor(R.styleable.ClockView_clock_secondsTickColor, _colors.secondsTickColor),
+                    minuteTickColor = a.getColor(R.styleable.ClockView_clock_minuteTickColor, _colors.minuteTickColor),
+                    hourTickColor = a.getColor(R.styleable.ClockView_clock_hourTickColor, _colors.hourTickColor),
+                    labelsColor = a.getColor(R.styleable.ClockView_clock_labelsColor, _colors.labelsColor)
+                )
+            } catch (e: Exception) {
+                log("init: " + e.localizedMessage)
+            } finally {
+                a.recycle()
+            }
+        }
+
         _shadowPaint.isAntiAlias = true
         _shadowPaint.maskFilter = BlurMaskFilter(
             dp2px(SHADOW_RADIUS).toFloat(),
@@ -100,6 +135,12 @@ class ClockView constructor(
 
         _backgroundPaint.isAntiAlias = true
         _backgroundPaint.style = Paint.Style.FILL
+
+        _innerCirclePaint.isAntiAlias = true
+        _innerCirclePaint.style = Paint.Style.FILL
+
+        _pinPaint.isAntiAlias = true
+        _pinPaint.style = Paint.Style.FILL
     }
 
     private fun initTime(millis: Long) {
@@ -118,7 +159,6 @@ class ClockView constructor(
         log("onDraw: w=$width, h=$height")
         if (canvas == null) return
         val millis = System.currentTimeMillis()
-//        canvas?.drawColor(Color.RED)
         if (_params.showShadow) {
             drawClockShadow(canvas)
         }
@@ -131,7 +171,33 @@ class ClockView constructor(
         if (_params.showSecondsTick) {
             drawSecondArrow(canvas)
         }
+        drawInnerCircle(canvas)
+        drawPin(canvas)
         log("onDraw: duration=${System.currentTimeMillis() - millis}")
+    }
+
+    private fun drawPin(canvas: Canvas) {
+        _clockRect?.also { rect ->
+            _pinPaint.color = _colors.pinColor
+            canvas.drawCircle(
+                rect.centerXf(),
+                rect.centerYf(),
+                _pinRadius,
+                _pinPaint
+            )
+        }
+    }
+
+    private fun drawInnerCircle(canvas: Canvas) {
+        _clockRect?.also { rect ->
+            _innerCirclePaint.color = _colors.innerCircleColor
+            canvas.drawCircle(
+                rect.centerXf(),
+                rect.centerYf(),
+                _innerCircleRadius,
+                _innerCirclePaint
+            )
+        }
     }
 
     private fun drawSecondArrow(canvas: Canvas) {
@@ -275,6 +341,11 @@ class ClockView constructor(
 
         log("processCalculations: clockRect=$_clockRect")
 
+        _innerCircleRadius = clockRect.widthF() / 2f * _params.pinCircleSize
+        _pinRadius = clockRect.widthF() / 2f * 0.03f
+
+
+
         val mLabelLength = (clockRect.widthF() * 0.85f / 2f).toInt()
         _labelPoints[0] =
             circlePoint(clockRect.centerX(), clockRect.centerY(), mLabelLength, 270f)
@@ -282,42 +353,44 @@ class ClockView constructor(
         _labelPoints[2] = circlePoint(clockRect.centerX(), clockRect.centerY(), mLabelLength, 90f)
         _labelPoints[3] =
             circlePoint(clockRect.centerX(), clockRect.centerY(), mLabelLength, 180f)
-        val mHourArrowWidth = (clockRect.widthF() * HOUR_ARROW_WIDTH).toInt()
-        val mHourArrowLength = (clockRect.widthF() / 2f * HOUR_ARROW_LENGTH).toInt()
-        val mMinuteArrowWidth = (clockRect.widthF() * MINUTE_ARROW_WIDTH).toInt()
-        val mMinuteArrowLength = (clockRect.widthF() / 2f * MINUTE_ARROW_LENGTH).toInt()
-        val mSecondArrowWidth = (clockRect.widthF() * SECOND_ARROW_WIDTH).toInt()
-        val mSecondArrowLength = (clockRect.widthF() / 2f * SECOND_ARROW_LENGTH).toInt()
+
+        val mHourArrowWidth = clockRect.widthF() * _params.hourTickWidth
+        val mHourArrowLength = clockRect.widthF() / 2f * HOUR_ARROW_LENGTH
+
+        val mMinuteArrowWidth = clockRect.widthF() * _params.minuteTickWidth
+        val mMinuteArrowLength = clockRect.widthF() / 2f * MINUTE_ARROW_LENGTH
+
+        val mSecondArrowWidth = clockRect.widthF() * _params.secondTickWidth
+        val mSecondArrowLength = clockRect.widthF() / 2f * SECOND_ARROW_LENGTH
         create(
             _secondTick,
-            clockRect.centerX(),
-            clockRect.centerY(),
+            clockRect.centerXf(),
+            clockRect.centerYf(),
             mSecondArrowWidth,
             mSecondArrowLength
         )
         create(
             _minuteTick,
-            clockRect.centerX(),
-            clockRect.centerY(),
+            clockRect.centerXf(),
+            clockRect.centerYf(),
             mMinuteArrowWidth,
             mMinuteArrowLength
         )
         create(
             _hourTick,
-            clockRect.centerX(),
-            clockRect.centerY(),
+            clockRect.centerXf(),
+            clockRect.centerYf(),
             mHourArrowWidth,
             mHourArrowLength
         )
     }
 
-    private fun create(path: Path, cx: Int, cy: Int, width: Int, length: Int) {
+    private fun create(path: Path, cx: Float, cy: Float, width: Float, length: Float) {
         path.reset()
-        path.moveTo(cx + width / 2f, cy.toFloat())
-        path.lineTo(cx.toFloat(), cy.toFloat() - length)
-        path.lineTo(cx - width / 2f, cy.toFloat())
-        path.lineTo(cx.toFloat(), cy + length * 0.1f)
-        path.lineTo(cx + width / 2f, cy.toFloat())
+        path.moveTo(cx + length, cy - width / 2f) // top right
+        path.lineTo(cx + length, cy + width / 2f) // bottom right
+        path.lineTo(cx, cy + width / 2f) // bottom left
+        path.lineTo(cx, cy - width / 2f) // top left
         path.close()
     }
 
@@ -355,12 +428,9 @@ class ClockView constructor(
     companion object {
         private const val TAG = "ClockView"
         private const val SHADOW_RADIUS = 15
-        private const val HOUR_ARROW_WIDTH = 0.05f
-        private const val MINUTE_ARROW_WIDTH = 0.03f
-        private const val SECOND_ARROW_WIDTH = 0.02f
-        private const val HOUR_ARROW_LENGTH = 0.55f
+        private const val HOUR_ARROW_LENGTH = 0.60f
         private const val MINUTE_ARROW_LENGTH = 0.75f
-        private const val SECOND_ARROW_LENGTH = 0.35f
+        private const val SECOND_ARROW_LENGTH = 0.80f
     }
 }
 
@@ -379,7 +449,11 @@ private fun Rect.centerYf(): Float {
 data class ClockParams(
     val showHourLabels: Boolean = false,
     val showShadow: Boolean = false,
-    val showSecondsTick: Boolean = true
+    val showSecondsTick: Boolean = true,
+    val pinCircleSize: Float = 0.07f, // 0.05 - 0.15
+    val hourTickWidth: Float = 0.04f, // 0.035 - 0.045
+    val minuteTickWidth: Float = 0.03f, // 0.01 - 0.03
+    val secondTickWidth: Float = 0.003f // 0.001 - 0.008
 )
 
 data class ClockColors(
@@ -388,7 +462,9 @@ data class ClockColors(
     @ColorInt val minuteTickColor: Int = Color.GREEN,
     @ColorInt val secondsTickColor: Int = Color.BLUE,
     @ColorInt val labelsColor: Int = Color.BLACK,
-    @ColorInt val shadowColor: Int = Color.BLACK
+    @ColorInt val shadowColor: Int = Color.BLACK,
+    @ColorInt val pinColor: Int = Color.DKGRAY,
+    @ColorInt val innerCircleColor: Int = Color.CYAN
 )
 
 internal data class ClockTime(

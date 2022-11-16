@@ -1,15 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background"
     android:gravity="center"
     android:orientation="vertical"
     tools:context=".MainActivity">
 
     <com.github.naz013.clockapp.ClockView
         android:id="@+id/clockView"
-        android:layout_width="256dp"
-        android:layout_height="wrap_content" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="24dp"
+        app:clock_backgroundColor="@color/clock_background"
+        app:clock_hourTickColor="@color/clock_hour_tick"
+        app:clock_hourTickWidth="0.04"
+        app:clock_innerCircleColor="@color/clock_pin_circle"
+        app:clock_innerCircleSize="0.07"
+        app:clock_minuteTickColor="@color/clock_minute_tick"
+        app:clock_minuteTickWidth="0.03"
+        app:clock_pinColor="@color/clock_pin"
+        app:clock_secondsTickColor="@color/clock_seconds_tick"
+        app:clock_secondsTickWidth="0.003"
+        app:clock_showSecondsTick="true"
+        app:clock_showShadow="false" />
 
 </LinearLayout>
