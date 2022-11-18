@@ -8,10 +8,12 @@
         <attr name="clock_innerCircleColor" format="color" />
         <attr name="clock_pinColor" format="color" />
         <attr name="clock_labelsColor" format="color" />
+        <attr name="clock_shadowColor" format="color" />
 
         <attr name="clock_showSecondsTick" format="boolean" />
         <attr name="clock_showShadow" format="boolean" />
         <attr name="clock_showHourLabel" format="boolean" />
+        <attr name="clock_showInnerCircleBorder" format="boolean" />
 
         <attr name="clock_innerCircleSize" format="float" />
         <attr name="clock_hourTickWidth" format="float" />

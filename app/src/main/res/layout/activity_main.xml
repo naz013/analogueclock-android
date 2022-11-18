@@ -5,26 +5,136 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
-    android:gravity="center"
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <com.github.naz013.clockapp.ClockView
-        android:id="@+id/clockView"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="24dp"
-        app:clock_backgroundColor="@color/clock_background"
-        app:clock_hourTickColor="@color/clock_hour_tick"
-        app:clock_hourTickWidth="0.04"
-        app:clock_innerCircleColor="@color/clock_pin_circle"
-        app:clock_innerCircleSize="0.07"
-        app:clock_minuteTickColor="@color/clock_minute_tick"
-        app:clock_minuteTickWidth="0.03"
-        app:clock_pinColor="@color/clock_pin"
-        app:clock_secondsTickColor="@color/clock_seconds_tick"
-        app:clock_secondsTickWidth="0.003"
-        app:clock_showSecondsTick="true"
-        app:clock_showShadow="false" />
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/settingsButton"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="?selectableItemBackground"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_settings"
+            app:tint="@color/text_secondary" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/addButton"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="?selectableItemBackground"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_add_plus"
+            app:tint="@color/theme_switch" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/clockNameView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/text_tertiary"
+            android:textSize="18sp"
+            tools:text="Europe/Kyiv" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/timeView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:textColor="@color/text_primary"
+                android:textSize="56sp"
+                tools:text="10:54" />
+
+            <TextView
+                android:id="@+id/amPmView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:rotation="90"
+                android:textColor="@color/text_tertiary"
+                android:textSize="20sp"
+                tools:text="PM" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="48dp">
+
+        <com.github.naz013.clockapp.ClockView
+            android:id="@+id/clockView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:clock_backgroundColor="@color/clock_background"
+            app:clock_hourTickColor="@color/clock_hour_tick"
+            app:clock_hourTickWidth="0.04"
+            app:clock_innerCircleColor="@color/clock_pin_circle"
+            app:clock_innerCircleSize="0.07"
+            app:clock_minuteTickColor="@color/clock_minute_tick"
+            app:clock_minuteTickWidth="0.03"
+            app:clock_pinColor="@color/clock_pin"
+            app:clock_secondsTickColor="@color/clock_seconds_tick"
+            app:clock_secondsTickWidth="0.003"
+            app:clock_shadowColor="@color/clock_shadow"
+            app:clock_showInnerCircleBorder="@bool/show_inner_circle_border"
+            app:clock_showSecondsTick="true"
+            app:clock_showShadow="@bool/clock_shadow" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ui_mode_switch"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_sun"
+            app:tint="@color/theme_switch" />
+
+    </FrameLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/clocksList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:itemCount="5"
+        tools:listitem="@layout/list_item_clock" />
 
 </LinearLayout>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:background="@drawable/card_bg"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/clockNameView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_secondary"
+        android:textSize="18sp"
+        tools:text="Europe/Kyiv" />
+
+    <TextView
+        android:id="@+id/offsetView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/text_tertiary"
+        android:textSize="12sp"
+        tools:text="+ 3HRS" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal">
+
+        <View
+            android:layout_width="72dp"
+            android:layout_height="1dp" />
+
+        <TextView
+            android:id="@+id/timeView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="32sp"
+            tools:text="10:54" />
+
+        <TextView
+            android:id="@+id/amPmView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:rotation="90"
+            android:textColor="@color/text_tertiary"
+            android:textSize="12sp"
+            tools:text="PM" />
+
+    </LinearLayout>
+
+</LinearLayout>

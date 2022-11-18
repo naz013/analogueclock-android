@@ -90,26 +90,74 @@ class ClockView constructor(
         val textSize = 25f
 
         if (attrs != null && context != null) {
-            val a: TypedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.ClockView, defStyleAttr, 0)
+            val a: TypedArray =
+                context.theme.obtainStyledAttributes(attrs, R.styleable.ClockView, defStyleAttr, 0)
             try {
                 _params = _params.copy(
-                    showHourLabels = a.getBoolean(R.styleable.ClockView_clock_showHourLabel, _params.showHourLabels),
-                    showSecondsTick = a.getBoolean(R.styleable.ClockView_clock_showSecondsTick, _params.showSecondsTick),
-                    showShadow = a.getBoolean(R.styleable.ClockView_clock_showShadow, _params.showShadow),
-                    pinCircleSize = a.getFloat(R.styleable.ClockView_clock_innerCircleSize, _params.pinCircleSize),
-                    secondTickWidth = a.getFloat(R.styleable.ClockView_clock_secondsTickWidth, _params.secondTickWidth),
-                    minuteTickWidth = a.getFloat(R.styleable.ClockView_clock_minuteTickWidth, _params.minuteTickWidth),
-                    hourTickWidth = a.getFloat(R.styleable.ClockView_clock_hourTickWidth, _params.hourTickWidth)
+                    showHourLabels = a.getBoolean(
+                        R.styleable.ClockView_clock_showHourLabel,
+                        _params.showHourLabels
+                    ),
+                    showSecondsTick = a.getBoolean(
+                        R.styleable.ClockView_clock_showSecondsTick,
+                        _params.showSecondsTick
+                    ),
+                    showShadow = a.getBoolean(
+                        R.styleable.ClockView_clock_showShadow,
+                        _params.showShadow
+                    ),
+                    showInnerCircleBorder = a.getBoolean(
+                        R.styleable.ClockView_clock_showInnerCircleBorder,
+                        _params.showInnerCircleBorder
+                    ),
+                    pinCircleSize = a.getFloat(
+                        R.styleable.ClockView_clock_innerCircleSize,
+                        _params.pinCircleSize
+                    ),
+                    secondTickWidth = a.getFloat(
+                        R.styleable.ClockView_clock_secondsTickWidth,
+                        _params.secondTickWidth
+                    ),
+                    minuteTickWidth = a.getFloat(
+                        R.styleable.ClockView_clock_minuteTickWidth,
+                        _params.minuteTickWidth
+                    ),
+                    hourTickWidth = a.getFloat(
+                        R.styleable.ClockView_clock_hourTickWidth,
+                        _params.hourTickWidth
+                    )
                 )
 
                 _colors = _colors.copy(
-                    clockColor = a.getColor(R.styleable.ClockView_clock_backgroundColor, _colors.clockColor),
+                    clockColor = a.getColor(
+                        R.styleable.ClockView_clock_backgroundColor,
+                        _colors.clockColor
+                    ),
                     pinColor = a.getColor(R.styleable.ClockView_clock_pinColor, _colors.pinColor),
-                    innerCircleColor = a.getColor(R.styleable.ClockView_clock_innerCircleColor, _colors.innerCircleColor),
-                    secondsTickColor = a.getColor(R.styleable.ClockView_clock_secondsTickColor, _colors.secondsTickColor),
-                    minuteTickColor = a.getColor(R.styleable.ClockView_clock_minuteTickColor, _colors.minuteTickColor),
-                    hourTickColor = a.getColor(R.styleable.ClockView_clock_hourTickColor, _colors.hourTickColor),
-                    labelsColor = a.getColor(R.styleable.ClockView_clock_labelsColor, _colors.labelsColor)
+                    innerCircleColor = a.getColor(
+                        R.styleable.ClockView_clock_innerCircleColor,
+                        _colors.innerCircleColor
+                    ),
+                    secondsTickColor = a.getColor(
+                        R.styleable.ClockView_clock_secondsTickColor,
+                        _colors.secondsTickColor
+                    ),
+                    minuteTickColor = a.getColor(
+                        R.styleable.ClockView_clock_minuteTickColor,
+                        _colors.minuteTickColor
+                    ),
+                    hourTickColor = a.getColor(
+                        R.styleable.ClockView_clock_hourTickColor,
+                        _colors.hourTickColor
+                    ),
+                    labelsColor = a.getColor(
+                        R.styleable.ClockView_clock_labelsColor,
+                        _colors.labelsColor
+                    ),
+                    shadowColor = a.getColor(
+                        R.styleable.ClockView_clock_shadowColor,
+                        _colors.shadowColor
+                    )
                 )
             } catch (e: Exception) {
                 log("init: " + e.localizedMessage)
@@ -155,10 +203,7 @@ class ClockView constructor(
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        log("onDraw: canvas=$canvas")
-        log("onDraw: w=$width, h=$height")
         if (canvas == null) return
-        val millis = System.currentTimeMillis()
         if (_params.showShadow) {
             drawClockShadow(canvas)
         }
@@ -166,14 +211,13 @@ class ClockView constructor(
         if (_params.showHourLabels) {
             drawHourLabels(canvas)
         }
-        drawHourArrow(canvas)
         drawMinuteArrow(canvas)
+        drawHourArrow(canvas)
         if (_params.showSecondsTick) {
             drawSecondArrow(canvas)
         }
         drawInnerCircle(canvas)
         drawPin(canvas)
-        log("onDraw: duration=${System.currentTimeMillis() - millis}")
     }
 
     private fun drawPin(canvas: Canvas) {
@@ -190,11 +234,20 @@ class ClockView constructor(
 
     private fun drawInnerCircle(canvas: Canvas) {
         _clockRect?.also { rect ->
+            if (_params.showInnerCircleBorder) {
+                _innerCirclePaint.color = _colors.hourTickColor
+                canvas.drawCircle(
+                    rect.centerXf(),
+                    rect.centerYf(),
+                    _innerCircleRadius,
+                    _innerCirclePaint
+                )
+            }
             _innerCirclePaint.color = _colors.innerCircleColor
             canvas.drawCircle(
                 rect.centerXf(),
                 rect.centerYf(),
-                _innerCircleRadius,
+                _innerCircleRadius * 0.97f,
                 _innerCirclePaint
             )
         }
@@ -270,7 +323,7 @@ class ClockView constructor(
             canvas.drawCircle(
                 rect.centerXf(),
                 rect.centerYf(),
-                rect.width() / 2f,
+                rect.width() / 2f * 0.95f,
                 _shadowPaint
             )
         }
@@ -299,7 +352,6 @@ class ClockView constructor(
             }
             angle = minutes.toFloat() * 0.5f
         }
-        log("hourAngle: angle=$angle, hour=${_time.hour}")
         return angle
     }
 
@@ -310,7 +362,6 @@ class ClockView constructor(
         if (validateValue(minute, 0, 59)) {
             angle = minute.toFloat() * 6f
         }
-        log("minuteAngle: angle=$angle, minute=${_time.minute}")
         return angle
     }
 
@@ -321,7 +372,6 @@ class ClockView constructor(
         if (validateValue(second, 0, 59)) {
             angle = second.toFloat() * 6f
         }
-        log("secondAngle: angle=$angle, minute=${_time.second}")
         return angle
     }
 
@@ -339,12 +389,8 @@ class ClockView constructor(
         val clockRect = Rect(margin, margin, width - margin, width - margin)
         _clockRect = clockRect
 
-        log("processCalculations: clockRect=$_clockRect")
-
         _innerCircleRadius = clockRect.widthF() / 2f * _params.pinCircleSize
         _pinRadius = clockRect.widthF() / 2f * 0.03f
-
-
 
         val mLabelLength = (clockRect.widthF() * 0.85f / 2f).toInt()
         _labelPoints[0] =
@@ -450,6 +496,7 @@ data class ClockParams(
     val showHourLabels: Boolean = false,
     val showShadow: Boolean = false,
     val showSecondsTick: Boolean = true,
+    val showInnerCircleBorder: Boolean = true,
     val pinCircleSize: Float = 0.07f, // 0.05 - 0.15
     val hourTickWidth: Float = 0.04f, // 0.035 - 0.045
     val minuteTickWidth: Float = 0.03f, // 0.01 - 0.03
