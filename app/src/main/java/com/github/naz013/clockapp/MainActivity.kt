@@ -1,9 +1,12 @@
 package com.github.naz013.clockapp
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.github.naz013.clockapp.databinding.ActivityMainBinding
+import com.github.naz013.clockapp.databinding.DialogSettingsBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class MainActivity : AppCompatActivity() {
 
@@ -44,11 +47,27 @@ class MainActivity : AppCompatActivity() {
 
     private fun showMainClock(data: ClockData) {
         binding.timeView.text = data.time
-        binding.clockNameView.text = data.location + " | " + data.timeZone
-        binding.amPmView.text = data.amPm
+        binding.clockNameView.text = data.displayName
+        if (data.amPm == null) {
+            binding.amPmView.visibility = View.INVISIBLE
+        } else {
+            binding.amPmView.visibility = View.VISIBLE
+        }
+        binding.amPmView.text = data.amPm ?: "PM"
     }
 
     private fun showSettings() {
+        val dialogSettingsBinding = DialogSettingsBinding.inflate(layoutInflater)
 
+        dialogSettingsBinding.timeFormatSwitch.isChecked = viewModel.is12HourFormatEnabled()
+        dialogSettingsBinding.timeFormatSwitch.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.toggleHourFormat(isChecked)
+        }
+
+        MaterialAlertDialogBuilder(this)
+            .setView(dialogSettingsBinding.root)
+            .setPositiveButton("OK") { d, _ -> d.dismiss() }
+            .create()
+            .show()
     }
 }

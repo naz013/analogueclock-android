@@ -36,6 +36,14 @@ class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
         updateClocks()
     }
 
+    fun is12HourFormatEnabled() = prefs.is12HourFormat()
+
+    fun toggleHourFormat(isEnabled: Boolean) {
+        if (isEnabled == is12HourFormatEnabled()) return
+        prefs.set12HourFormat(isEnabled)
+        updateClocks()
+    }
+
     fun toggleUiMode() {
         _uiMode.postValue(uiModeManager.toggleUiMode())
     }
@@ -47,13 +55,7 @@ class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         _uiMode.postValue(uiModeManager.getUiMode())
-
-        viewModelScope.launch {
-            val mainClock = withContext(Dispatchers.Default) { clocksManager.getCurrentClock() }
-            _mainClock.postValue(mainClock)
-
-            val timeZones = withContext(Dispatchers.Default) { clocksManager.loadAllTimeZones() }
-        }
+        updateClocks()
     }
 
     override fun onResume(owner: LifecycleOwner) {
@@ -70,6 +72,9 @@ class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
         viewModelScope.launch {
             val mainClock = withContext(Dispatchers.IO) { clocksManager.getCurrentClock() }
             _mainClock.postValue(mainClock)
+
+            val userClocks = withContext(Dispatchers.Default) { clocksManager.getUserClocks() }
+            _clocks.postValue(userClocks)
         }
     }
 
@@ -77,11 +82,9 @@ class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
         stopClock()
         secondsTimer.start()
         minuteTimer.start(clocksManager.getNumberOfSecondsUntilEndOfMinute() * 1000L)
-        log("startClock")
     }
 
     private fun stopClock() {
-        log("stopClock")
         secondsTimer.stop()
         minuteTimer.stop()
     }

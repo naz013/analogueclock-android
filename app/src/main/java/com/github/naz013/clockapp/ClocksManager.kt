@@ -5,11 +5,13 @@ import org.joda.time.DateTimeZone
 import org.joda.time.LocalTime
 import org.joda.time.format.DateTimeFormat
 
-class ClocksManager(
-    private val prefs: Prefs
-) {
+class ClocksManager(private val prefs: Prefs) {
 
     private var timeZones: List<DateTimeZone> = emptyList()
+
+    fun getUserClocks(): List<ClockData> {
+        return prefs.getClockIds().map { DateTimeZone.forID(it) }.map { getClockData(it) }
+    }
 
     fun getNumberOfSecondsUntilEndOfMinute(): Int {
         return 60 - LocalTime.now().secondOfMinute
@@ -36,7 +38,7 @@ class ClocksManager(
         val time = LocalTime.now(timeZone)
         return ClockData(
             time = formatTime(time),
-            location = timeZone.getName(System.currentTimeMillis()),
+            displayName = timeZone.getName(System.currentTimeMillis()) + " | " + timeZone.id,
             timeZone = timeZone,
             amPm = formatAmpm(time)
         )

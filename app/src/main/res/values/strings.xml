@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ClockApp</string>
+    <string name="settings">Settings</string>
+    <string name="_12_hour_format">12 Hour format</string>
 </resources>

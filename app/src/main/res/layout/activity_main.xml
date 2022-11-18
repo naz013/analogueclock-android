@@ -50,6 +50,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:maxLength="100"
+            android:maxLines="1"
+            android:singleLine="true"
             android:textColor="@color/text_tertiary"
             android:textSize="18sp"
             tools:text="Europe/Kyiv" />
@@ -60,6 +63,16 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="4dp"
             android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:rotation="90"
+                android:text="PM"
+                android:textColor="@color/text_tertiary"
+                android:textSize="20sp"
+                android:visibility="invisible" />
 
             <TextView
                 android:id="@+id/timeView"
@@ -115,7 +128,7 @@
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             android:scaleType="centerInside"
             app:srcCompat="@drawable/ic_sun"
             app:tint="@color/theme_switch" />
