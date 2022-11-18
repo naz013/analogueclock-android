@@ -4,13 +4,28 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.widget.doOnTextChanged
+import androidx.lifecycle.viewModelScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.github.naz013.clockapp.adapter.BiDirectionalContract
+import com.github.naz013.clockapp.adapter.ClockRecyclerAdapter
+import com.github.naz013.clockapp.adapter.TimeZoneDataProvider
+import com.github.naz013.clockapp.adapter.TimeZoneRecyclerAdapter
+import com.github.naz013.clockapp.data.ClockData
+import com.github.naz013.clockapp.data.TimeZoneData
 import com.github.naz013.clockapp.databinding.ActivityMainBinding
 import com.github.naz013.clockapp.databinding.DialogSettingsBinding
+import com.github.naz013.clockapp.databinding.DialogTimeZonesBinding
+import com.github.naz013.clockapp.util.takeWithDots
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class MainActivity : AppCompatActivity() {
 
     private val viewModel: MainActivityViewModel = MainActivityViewModel()
+    private val adapter = ClockRecyclerAdapter {
+        viewModel.onItemClick(it)
+    }
+
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,11 +38,44 @@ class MainActivity : AppCompatActivity() {
         binding.addButton.setOnClickListener { viewModel.loadTimeZones() }
         binding.uiModeSwitch.setOnClickListener { viewModel.toggleUiMode() }
 
+        binding.clocksList.adapter = adapter
+        binding.clocksList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+
         lifecycle.addObserver(viewModel)
 
         viewModel.time.observe(this) { binding.clockView.setMillis(it) }
         viewModel.mainClock.observe(this) { showMainClock(it) }
         viewModel.uiMode.observe(this) { updateUiMode(it) }
+        viewModel.clocks.observe(this) { adapter.updateItems(it) }
+        viewModel.timeZones.observe(this) { showTimeZonesDialog(it) }
+    }
+
+    private fun showTimeZonesDialog(list: List<TimeZoneData>) {
+        val dialogTimeZonesBinding = DialogTimeZonesBinding.inflate(layoutInflater)
+
+        val contract = BiDirectionalContract<TimeZoneData, List<TimeZoneData>>()
+        val dataProvider = TimeZoneDataProvider(list, viewModel.viewModelScope) {
+            contract.notifyChild(it)
+        }
+        val adapter = TimeZoneRecyclerAdapter {
+            viewModel.toggleTimeZone(it)
+            contract.notifyParent(it)
+        }.apply { updateItems(list) }
+        contract.listenChild { dataProvider.updateItem(it) }
+        contract.listenParent { adapter.updateItems(it) }
+
+        dialogTimeZonesBinding.timeZoneList.layoutManager = LinearLayoutManager(this)
+        dialogTimeZonesBinding.timeZoneList.adapter = adapter
+        dialogTimeZonesBinding.searchView.doOnTextChanged { text, _, _, _ ->
+            dataProvider.onSearch(text?.toString() ?: "")
+        }
+
+        MaterialAlertDialogBuilder(this)
+            .setView(dialogTimeZonesBinding.root)
+            .setPositiveButton("OK") { d, _ -> d.dismiss() }
+            .create()
+            .show()
     }
 
     private fun updateUiMode(uiMode: Int) {
@@ -47,13 +95,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun showMainClock(data: ClockData) {
         binding.timeView.text = data.time
-        binding.clockNameView.text = data.displayName
+        binding.clockNameView.text = data.displayName.takeWithDots(Params.MAIN_CLOCK_NAME_LENGTH)
+        binding.amPmView.text = data.amPm ?: "PM"
         if (data.amPm == null) {
             binding.amPmView.visibility = View.INVISIBLE
         } else {
             binding.amPmView.visibility = View.VISIBLE
         }
-        binding.amPmView.text = data.amPm ?: "PM"
     }
 
     private fun showSettings() {

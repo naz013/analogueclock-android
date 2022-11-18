@@ -51,6 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:maxLength="100"
+            android:ellipsize="marquee"
             android:maxLines="1"
             android:singleLine="true"
             android:textColor="@color/text_tertiary"

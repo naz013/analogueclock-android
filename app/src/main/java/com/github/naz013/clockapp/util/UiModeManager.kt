@@ -1,4 +1,4 @@
-package com.github.naz013.clockapp
+package com.github.naz013.clockapp.util
 
 import androidx.appcompat.app.AppCompatDelegate
 

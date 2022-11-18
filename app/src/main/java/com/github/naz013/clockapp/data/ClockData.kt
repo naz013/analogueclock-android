@@ -1,4 +1,4 @@
-package com.github.naz013.clockapp
+package com.github.naz013.clockapp.data
 
 import org.joda.time.DateTimeZone
 

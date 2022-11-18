@@ -12,6 +12,9 @@
         android:id="@+id/clockNameView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:maxLength="48"
+        android:maxLines="1"
+        android:singleLine="true"
         android:textColor="@color/text_secondary"
         android:textSize="18sp"
         tools:text="Europe/Kyiv" />

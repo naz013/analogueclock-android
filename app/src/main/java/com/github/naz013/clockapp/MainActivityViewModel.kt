@@ -7,6 +7,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.naz013.clockapp.data.ClockData
+import com.github.naz013.clockapp.data.TimeZoneData
+import com.github.naz013.clockapp.util.ClocksManager
+import com.github.naz013.clockapp.util.Prefs
+import com.github.naz013.clockapp.util.UiModeManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,6 +34,9 @@ class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
     private val _clocks = MutableLiveData<List<ClockData>>()
     val clocks: LiveData<List<ClockData>> = _clocks
 
+    private val _timeZones = MutableLiveData<List<TimeZoneData>>()
+    val timeZones: LiveData<List<TimeZoneData>> = _timeZones
+
     private val secondsTimer = ClockTimer(1000L) {
         _time.postValue(System.currentTimeMillis())
     }
@@ -49,7 +57,49 @@ class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
     }
 
     fun loadTimeZones() {
+        viewModelScope.launch {
+            val timeZones = withContext(Dispatchers.Default) { clocksManager.getTimeZoneList() }
+            _timeZones.postValue(timeZones)
+        }
+    }
 
+    fun onItemClick(clockData: ClockData) {
+        viewModelScope.launch {
+            prefs.saveMainClockId(clockData.timeZone.id)
+            updateClocks()
+        }
+    }
+
+    fun toggleTimeZone(timeZoneData: TimeZoneData) {
+        if (timeZoneData.isSelected) {
+            addClock(timeZoneData)
+        } else {
+            removeClock(timeZoneData)
+        }
+    }
+
+    private fun addClock(timeZoneData: TimeZoneData) {
+        viewModelScope.launch {
+            withContext(Dispatchers.Default) {
+                val clockIds = prefs.getClockIds().toMutableList().apply {
+                    add(timeZoneData.timeZone.id)
+                }
+                prefs.saveClockIds(clockIds)
+            }
+            updateClocks()
+        }
+    }
+
+    private fun removeClock(timeZoneData: TimeZoneData) {
+        viewModelScope.launch {
+            withContext(Dispatchers.Default) {
+                val clockIds = prefs.getClockIds().toMutableList().apply {
+                    remove(timeZoneData.timeZone.id)
+                }
+                prefs.saveClockIds(clockIds)
+            }
+            updateClocks()
+        }
     }
 
     override fun onCreate(owner: LifecycleOwner) {
@@ -70,7 +120,7 @@ class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
 
     private fun updateClocks() {
         viewModelScope.launch {
-            val mainClock = withContext(Dispatchers.IO) { clocksManager.getCurrentClock() }
+            val mainClock = withContext(Dispatchers.Default) { clocksManager.getCurrentClock() }
             _mainClock.postValue(mainClock)
 
             val userClocks = withContext(Dispatchers.Default) { clocksManager.getUserClocks() }
