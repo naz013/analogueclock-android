@@ -350,27 +350,25 @@ class ClockView constructor(
             if (validateValue(_time.minute, 0, 59)) {
                 minutes += _time.minute
             }
-            angle = minutes.toFloat() * 0.5f
+            angle = 270f + minutes.toFloat() * 0.5f
         }
         return angle
     }
 
     private fun minuteAngle(): Float {
-        if (_time.minute == 0) return 0.0f
         var angle = 0.0f
         val minute = _time.minute
         if (validateValue(minute, 0, 59)) {
-            angle = minute.toFloat() * 6f
+            angle = 270f + minute.toFloat() * 6f
         }
         return angle
     }
 
     private fun secondAngle(): Float {
-        if (_time.second == 0) return 0.0f
         var angle = 0.0f
         val second = _time.second
         if (validateValue(second, 0, 59)) {
-            angle = second.toFloat() * 6f
+            angle = 270f + second.toFloat() * 6f
         }
         return angle
     }

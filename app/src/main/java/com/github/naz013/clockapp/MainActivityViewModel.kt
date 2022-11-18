@@ -14,7 +14,7 @@ import kotlinx.coroutines.withContext
 class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
 
     private val prefs = Prefs.getInstance()
-    private val clocksProvider = ClocksProvider()
+    private val clocksManager = ClocksManager(prefs)
     private val uiModeManager = UiModeManager(prefs)
 
     private val _uiMode = MutableLiveData<Int>()
@@ -48,10 +48,11 @@ class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
         super.onCreate(owner)
         _uiMode.postValue(uiModeManager.getUiMode())
 
-        clocksProvider.getCurrentClock()
-
         viewModelScope.launch {
-            val timeZones = withContext(Dispatchers.Default) { clocksProvider.loadAllTimeZones() }
+            val mainClock = withContext(Dispatchers.Default) { clocksManager.getCurrentClock() }
+            _mainClock.postValue(mainClock)
+
+            val timeZones = withContext(Dispatchers.Default) { clocksManager.loadAllTimeZones() }
         }
     }
 
@@ -67,7 +68,7 @@ class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
 
     private fun updateClocks() {
         viewModelScope.launch {
-            val mainClock = withContext(Dispatchers.IO) { clocksProvider.getCurrentClock() }
+            val mainClock = withContext(Dispatchers.IO) { clocksManager.getCurrentClock() }
             _mainClock.postValue(mainClock)
         }
     }
@@ -75,7 +76,7 @@ class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
     private fun startClock() {
         stopClock()
         secondsTimer.start()
-        minuteTimer.start()
+        minuteTimer.start(clocksManager.getNumberOfSecondsUntilEndOfMinute() * 1000L)
         log("startClock")
     }
 

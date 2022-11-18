@@ -9,11 +9,11 @@ class ClockTimer(
 ) {
     private var timer: Timer? = null
 
-    fun start() {
+    fun start(delayMillis: Long = 0L) {
         timer = Timer()
         timer?.schedule(object : TimerTask() {
             override fun run() { listener.invoke() }
-        }, 500L, repeatIntervalMillis)
+        }, delayMillis, repeatIntervalMillis)
     }
 
     fun stop() {
