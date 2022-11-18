@@ -11,6 +11,7 @@ import com.github.naz013.clockapp.adapter.BiDirectionalContract
 import com.github.naz013.clockapp.adapter.ClockRecyclerAdapter
 import com.github.naz013.clockapp.adapter.TimeZoneDataProvider
 import com.github.naz013.clockapp.adapter.TimeZoneRecyclerAdapter
+import com.github.naz013.clockapp.animation.TextAnimator
 import com.github.naz013.clockapp.data.ClockData
 import com.github.naz013.clockapp.data.TimeZoneData
 import com.github.naz013.clockapp.databinding.ActivityMainBinding
@@ -24,6 +25,9 @@ class MainActivity : AppCompatActivity() {
     private val viewModel: MainActivityViewModel = MainActivityViewModel()
     private val adapter = ClockRecyclerAdapter {
         viewModel.onItemClick(it)
+    }
+    private val textAnimator = TextAnimator {
+        binding.timeView.text = it
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -94,7 +98,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showMainClock(data: ClockData) {
-        binding.timeView.text = data.time
+        val oldTime = binding.timeView.text?.toString() ?: ""
+        if (oldTime.isEmpty()) {
+            binding.timeView.text = data.time
+        } else {
+            textAnimator.animate(oldTime, data.time)
+        }
         binding.clockNameView.text = data.displayName.takeWithDots(Params.MAIN_CLOCK_NAME_LENGTH)
         binding.amPmView.text = data.amPm ?: "PM"
         if (data.amPm == null) {
