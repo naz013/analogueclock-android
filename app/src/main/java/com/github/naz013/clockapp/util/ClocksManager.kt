@@ -1,6 +1,5 @@
 package com.github.naz013.clockapp.util
 
-import android.util.Log
 import com.github.naz013.clockapp.data.ClockData
 import com.github.naz013.clockapp.data.TimeZoneData
 import org.joda.time.DateTime
@@ -37,7 +36,14 @@ class ClocksManager(private val prefs: Prefs) {
     }
 
     private fun loadAllTimeZones(): List<DateTimeZone> {
-        timeZones = DateTimeZone.getAvailableIDs().map { DateTimeZone.forID(it) }
+        val currentTimeZone = DateTimeZone.getDefault()
+        timeZones = DateTimeZone.getAvailableIDs()
+            .map { DateTimeZone.forID(it) }
+            .filterNot { it.id == currentTimeZone.id }
+            .toMutableList()
+            .apply {
+                add(0, currentTimeZone)
+            }
         return timeZones
     }
 
@@ -53,7 +59,7 @@ class ClocksManager(private val prefs: Prefs) {
     private fun getTimeZoneData(timeZone: DateTimeZone, isSelected: Boolean = false): TimeZoneData {
         val time = DateTime.now(DateTimeZone.UTC).millis
         return TimeZoneData(
-            displayName = timeZone.getName(time) + " | " + printOffset(timeZone.getOffset(time)),
+            displayName = timeZone.id + " | " + printOffset(timeZone.getOffset(time)),
             shortName = timeZone.getShortName(time),
             timeZone = timeZone,
             isSelected = isSelected
@@ -68,10 +74,11 @@ class ClocksManager(private val prefs: Prefs) {
         val myTime = DateTime.now(myTimeZone)
         return ClockData(
             time = formatTime(time),
-            displayName = timeZone.getName(time.millis) + " | " + timeZone.id,
+            displayName = timeZone.id + " | " + timeZone.getName(time.millis),
             timeZone = timeZone,
             amPm = formatAmpm(time),
-            offset = printOffset(timeZone.getOffset(myTime))
+            offset = printOffset(timeZone.getOffset(myTime)),
+            dateTime = time
         )
     }
 
@@ -89,10 +96,6 @@ class ClocksManager(private val prefs: Prefs) {
         } else {
             null
         }
-    }
-
-    private fun log(message: String) {
-        Log.d("MainActivityVM", message)
     }
 
     private fun printOffset(offsetMillis: Int): String {

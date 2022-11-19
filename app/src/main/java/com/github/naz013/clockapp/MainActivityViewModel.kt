@@ -1,6 +1,5 @@
 package com.github.naz013.clockapp
 
-import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -8,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.naz013.clockapp.data.ClockData
+import com.github.naz013.clockapp.data.TimeData
 import com.github.naz013.clockapp.data.TimeZoneData
 import com.github.naz013.clockapp.util.ClocksManager
 import com.github.naz013.clockapp.util.Prefs
@@ -25,8 +25,11 @@ class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
     private val _uiMode = MutableLiveData<Int>()
     val uiMode: LiveData<Int> = _uiMode
 
-    private val _time = MutableLiveData<Long>()
-    val time: LiveData<Long> = _time
+    private val _time = MutableLiveData<TimeData>()
+    val time: LiveData<TimeData> = _time
+
+    private val _animateClock = MutableLiveData<TimeData>()
+    val animateClock: LiveData<TimeData> = _animateClock
 
     private val _mainClock = MutableLiveData<ClockData>()
     val mainClock: LiveData<ClockData> = _mainClock
@@ -37,12 +40,8 @@ class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
     private val _timeZones = MutableLiveData<List<TimeZoneData>>()
     val timeZones: LiveData<List<TimeZoneData>> = _timeZones
 
-    private val secondsTimer = ClockTimer(1000L) {
-        _time.postValue(System.currentTimeMillis())
-    }
-    private val minuteTimer = ClockTimer(60000L) {
-        updateClocks()
-    }
+    private val secondsTimer = ClockTimer(1000L) { updateMainClock() }
+    private val minuteTimer = ClockTimer(60000L) { updateClocks() }
 
     fun is12HourFormatEnabled() = prefs.is12HourFormat()
 
@@ -66,7 +65,23 @@ class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
     fun onItemClick(clockData: ClockData) {
         viewModelScope.launch {
             prefs.saveMainClockId(clockData.timeZone.id)
-            updateClocks()
+
+            pauseTimer()
+
+            val mainClock = withContext(Dispatchers.Default) { clocksManager.getCurrentClock() }
+            _mainClock.postValue(mainClock)
+
+            val userClocks = withContext(Dispatchers.Default) { clocksManager.getUserClocks() }
+            _clocks.postValue(userClocks)
+
+            val time = clocksManager.getCurrentClock().dateTime
+            _animateClock.postValue(
+                TimeData(
+                    hour = time.hourOfDay,
+                    minute = time.minuteOfHour,
+                    second = time.secondOfMinute
+                )
+            )
         }
     }
 
@@ -76,6 +91,17 @@ class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
         } else {
             removeClock(timeZoneData)
         }
+    }
+
+    private fun updateMainClock() {
+        val time = clocksManager.getCurrentClock().dateTime
+        _time.postValue(
+            TimeData(
+                hour = time.hourOfDay,
+                minute = time.minuteOfHour,
+                second = time.secondOfMinute
+            )
+        )
     }
 
     private fun addClock(timeZoneData: TimeZoneData) {
@@ -139,7 +165,11 @@ class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
         minuteTimer.stop()
     }
 
-    private fun log(message: String) {
-        Log.d("MainActivityVM", message)
+    fun resumeTimer() {
+        secondsTimer.start()
+    }
+
+    private fun pauseTimer() {
+        secondsTimer.stop()
     }
 }

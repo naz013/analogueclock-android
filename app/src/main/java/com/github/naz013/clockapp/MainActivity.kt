@@ -12,7 +12,9 @@ import com.github.naz013.clockapp.adapter.ClockRecyclerAdapter
 import com.github.naz013.clockapp.adapter.TimeZoneDataProvider
 import com.github.naz013.clockapp.adapter.TimeZoneRecyclerAdapter
 import com.github.naz013.clockapp.animation.TextAnimator
+import com.github.naz013.clockapp.animation.TimeAnimator
 import com.github.naz013.clockapp.data.ClockData
+import com.github.naz013.clockapp.data.TimeData
 import com.github.naz013.clockapp.data.TimeZoneData
 import com.github.naz013.clockapp.databinding.ActivityMainBinding
 import com.github.naz013.clockapp.databinding.DialogSettingsBinding
@@ -28,6 +30,9 @@ class MainActivity : AppCompatActivity() {
     }
     private val textAnimator = TextAnimator {
         binding.timeView.text = it
+    }
+    private val timeAnimator = TimeAnimator({ binding.clockView.setTime(it) }) {
+        viewModel.resumeTimer()
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -47,12 +52,20 @@ class MainActivity : AppCompatActivity() {
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
         lifecycle.addObserver(viewModel)
+        lifecycle.addObserver(textAnimator)
+        lifecycle.addObserver(timeAnimator)
 
-        viewModel.time.observe(this) { binding.clockView.setMillis(it) }
+        viewModel.time.observe(this) { binding.clockView.setTime(it) }
         viewModel.mainClock.observe(this) { showMainClock(it) }
         viewModel.uiMode.observe(this) { updateUiMode(it) }
         viewModel.clocks.observe(this) { adapter.updateItems(it) }
         viewModel.timeZones.observe(this) { showTimeZonesDialog(it) }
+        viewModel.animateClock.observe(this) { updateClock(it) }
+    }
+
+    private fun updateClock(data: TimeData) {
+        val oldTime = binding.clockView.getTime()
+        timeAnimator.animate(oldTime, data.copy(second = data.second + 1))
     }
 
     private fun showTimeZonesDialog(list: List<TimeZoneData>) {
@@ -88,9 +101,11 @@ class MainActivity : AppCompatActivity() {
             AppCompatDelegate.MODE_NIGHT_NO -> {
                 binding.uiModeSwitch.setImageResource(R.drawable.ic_sun)
             }
+
             AppCompatDelegate.MODE_NIGHT_YES -> {
                 binding.uiModeSwitch.setImageResource(R.drawable.ic_moon)
             }
+
             AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> {
                 binding.uiModeSwitch.setImageResource(R.drawable.ic_android)
             }

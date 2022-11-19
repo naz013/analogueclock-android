@@ -17,6 +17,7 @@ import android.view.View
 import android.view.WindowManager
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
+import com.github.naz013.clockapp.data.TimeData
 import java.util.Calendar
 import kotlin.math.cos
 import kotlin.math.sin
@@ -62,26 +63,12 @@ class ClockView constructor(
         0
     )
 
-    fun getTimeMillis(): Long {
-        val calendar: Calendar = Calendar.getInstance()
-        calendar.timeInMillis = System.currentTimeMillis()
-        calendar.set(Calendar.HOUR_OF_DAY, _time.hour)
-        calendar.set(Calendar.MINUTE, _time.minute)
-        calendar.set(Calendar.SECOND, _time.second)
-        return calendar.timeInMillis
+    fun getTime(): TimeData {
+        return TimeData(_time.hour, _time.minute, _time.second)
     }
 
-    fun setMillis(millis: Long) {
-        initTime(millis)
-        this.invalidate()
-    }
-
-    fun setTime(hourOfDay: Int, minute: Int) {
-        this.setTime(hourOfDay, minute, 0)
-    }
-
-    fun setTime(hourOfDay: Int, minute: Int, second: Int) {
-        _time = ClockTime(hourOfDay, minute, second)
+    fun setTime(timeData: TimeData) {
+        _time = ClockTime(timeData.hour, timeData.minute, timeData.second)
         this.invalidate()
     }
 

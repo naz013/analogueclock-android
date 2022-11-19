@@ -1,6 +1,7 @@
 package com.github.naz013.clockapp.animation
 
 import android.animation.ValueAnimator
+import android.view.animation.AccelerateInterpolator
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.github.naz013.clockapp.Params
@@ -16,6 +17,7 @@ class TextAnimator(
 
         ValueAnimator.ofInt(timeToInt(from), timeToInt(to)).apply {
             duration = Params.ANIMATION_DURATION
+            interpolator = AccelerateInterpolator()
             addUpdateListener {
                 animationListener.invoke(intToTime(it.animatedValue as Int))
             }
