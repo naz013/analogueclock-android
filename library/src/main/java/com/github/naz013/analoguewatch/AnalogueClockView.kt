@@ -1,4 +1,4 @@
-package com.github.naz013.clockapp
+package com.github.naz013.analoguewatch
 
 import android.content.Context
 import android.content.res.TypedArray
@@ -17,12 +17,11 @@ import android.view.View
 import android.view.WindowManager
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
-import com.github.naz013.clockapp.data.TimeData
 import java.util.Calendar
 import kotlin.math.cos
 import kotlin.math.sin
 
-class ClockView constructor(
+class AnalogueClockView constructor(
     context: Context?,
     attrs: AttributeSet?,
     defStyleAttr: Int,
@@ -78,71 +77,75 @@ class ClockView constructor(
 
         if (attrs != null && context != null) {
             val a: TypedArray =
-                context.theme.obtainStyledAttributes(attrs, R.styleable.ClockView, defStyleAttr, 0)
+                context.theme.obtainStyledAttributes(attrs, R.styleable.AnalogueClockView, defStyleAttr, 0)
             try {
                 _params = _params.copy(
                     showHourLabels = a.getBoolean(
-                        R.styleable.ClockView_clock_showHourLabel,
+                        R.styleable.AnalogueClockView_clock_showHourLabel,
                         _params.showHourLabels
                     ),
                     showSecondsTick = a.getBoolean(
-                        R.styleable.ClockView_clock_showSecondsTick,
+                        R.styleable.AnalogueClockView_clock_showSecondsTick,
                         _params.showSecondsTick
                     ),
                     showShadow = a.getBoolean(
-                        R.styleable.ClockView_clock_showShadow,
+                        R.styleable.AnalogueClockView_clock_showShadow,
                         _params.showShadow
                     ),
+                    catModeEnabled = a.getBoolean(
+                        R.styleable.AnalogueClockView_clock_catModeEnabled,
+                        _params.catModeEnabled
+                    ),
                     showInnerCircleBorder = a.getBoolean(
-                        R.styleable.ClockView_clock_showInnerCircleBorder,
+                        R.styleable.AnalogueClockView_clock_showInnerCircleBorder,
                         _params.showInnerCircleBorder
                     ),
                     pinCircleSize = a.getFloat(
-                        R.styleable.ClockView_clock_innerCircleSize,
+                        R.styleable.AnalogueClockView_clock_innerCircleSize,
                         _params.pinCircleSize
                     ),
                     secondTickWidth = a.getFloat(
-                        R.styleable.ClockView_clock_secondsTickWidth,
+                        R.styleable.AnalogueClockView_clock_secondsTickWidth,
                         _params.secondTickWidth
                     ),
                     minuteTickWidth = a.getFloat(
-                        R.styleable.ClockView_clock_minuteTickWidth,
+                        R.styleable.AnalogueClockView_clock_minuteTickWidth,
                         _params.minuteTickWidth
                     ),
                     hourTickWidth = a.getFloat(
-                        R.styleable.ClockView_clock_hourTickWidth,
+                        R.styleable.AnalogueClockView_clock_hourTickWidth,
                         _params.hourTickWidth
                     )
                 )
 
                 _colors = _colors.copy(
                     clockColor = a.getColor(
-                        R.styleable.ClockView_clock_backgroundColor,
+                        R.styleable.AnalogueClockView_clock_backgroundColor,
                         _colors.clockColor
                     ),
-                    pinColor = a.getColor(R.styleable.ClockView_clock_pinColor, _colors.pinColor),
+                    pinColor = a.getColor(R.styleable.AnalogueClockView_clock_pinColor, _colors.pinColor),
                     innerCircleColor = a.getColor(
-                        R.styleable.ClockView_clock_innerCircleColor,
+                        R.styleable.AnalogueClockView_clock_innerCircleColor,
                         _colors.innerCircleColor
                     ),
                     secondsTickColor = a.getColor(
-                        R.styleable.ClockView_clock_secondsTickColor,
+                        R.styleable.AnalogueClockView_clock_secondsTickColor,
                         _colors.secondsTickColor
                     ),
                     minuteTickColor = a.getColor(
-                        R.styleable.ClockView_clock_minuteTickColor,
+                        R.styleable.AnalogueClockView_clock_minuteTickColor,
                         _colors.minuteTickColor
                     ),
                     hourTickColor = a.getColor(
-                        R.styleable.ClockView_clock_hourTickColor,
+                        R.styleable.AnalogueClockView_clock_hourTickColor,
                         _colors.hourTickColor
                     ),
                     labelsColor = a.getColor(
-                        R.styleable.ClockView_clock_labelsColor,
+                        R.styleable.AnalogueClockView_clock_labelsColor,
                         _colors.labelsColor
                     ),
                     shadowColor = a.getColor(
-                        R.styleable.ClockView_clock_shadowColor,
+                        R.styleable.AnalogueClockView_clock_shadowColor,
                         _colors.shadowColor
                     )
                 )
@@ -456,6 +459,35 @@ class ClockView constructor(
         Log.d(TAG, message)
     }
 
+    internal data class ClockParams(
+        val showHourLabels: Boolean = false,
+        val showShadow: Boolean = false,
+        val showSecondsTick: Boolean = true,
+        val showInnerCircleBorder: Boolean = true,
+        val catModeEnabled: Boolean = false,
+        val pinCircleSize: Float = 0.07f, // 0.05 - 0.15
+        val hourTickWidth: Float = 0.04f, // 0.035 - 0.045
+        val minuteTickWidth: Float = 0.03f, // 0.01 - 0.03
+        val secondTickWidth: Float = 0.003f // 0.001 - 0.008
+    )
+
+    internal data class ClockColors(
+        @ColorInt val clockColor: Int = Color.LTGRAY,
+        @ColorInt val hourTickColor: Int = Color.RED,
+        @ColorInt val minuteTickColor: Int = Color.GREEN,
+        @ColorInt val secondsTickColor: Int = Color.BLUE,
+        @ColorInt val labelsColor: Int = Color.BLACK,
+        @ColorInt val shadowColor: Int = Color.BLACK,
+        @ColorInt val pinColor: Int = Color.DKGRAY,
+        @ColorInt val innerCircleColor: Int = Color.CYAN
+    )
+
+    internal data class ClockTime(
+        val hour: Int = 0,
+        val minute: Int = 0,
+        val second: Int = 0
+    )
+
     companion object {
         private const val TAG = "ClockView"
         private const val SHADOW_RADIUS = 15
@@ -464,43 +496,3 @@ class ClockView constructor(
         private const val SECOND_ARROW_LENGTH = 0.80f
     }
 }
-
-private fun Rect.widthF(): Float {
-    return width().toFloat()
-}
-
-private fun Rect.centerXf(): Float {
-    return centerX().toFloat()
-}
-
-private fun Rect.centerYf(): Float {
-    return centerY().toFloat()
-}
-
-data class ClockParams(
-    val showHourLabels: Boolean = false,
-    val showShadow: Boolean = false,
-    val showSecondsTick: Boolean = true,
-    val showInnerCircleBorder: Boolean = true,
-    val pinCircleSize: Float = 0.07f, // 0.05 - 0.15
-    val hourTickWidth: Float = 0.04f, // 0.035 - 0.045
-    val minuteTickWidth: Float = 0.03f, // 0.01 - 0.03
-    val secondTickWidth: Float = 0.003f // 0.001 - 0.008
-)
-
-data class ClockColors(
-    @ColorInt val clockColor: Int = Color.LTGRAY,
-    @ColorInt val hourTickColor: Int = Color.RED,
-    @ColorInt val minuteTickColor: Int = Color.GREEN,
-    @ColorInt val secondsTickColor: Int = Color.BLUE,
-    @ColorInt val labelsColor: Int = Color.BLACK,
-    @ColorInt val shadowColor: Int = Color.BLACK,
-    @ColorInt val pinColor: Int = Color.DKGRAY,
-    @ColorInt val innerCircleColor: Int = Color.CYAN
-)
-
-internal data class ClockTime(
-    val hour: Int = 0,
-    val minute: Int = 0,
-    val second: Int = 0
-)

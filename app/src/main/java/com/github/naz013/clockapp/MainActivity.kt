@@ -14,7 +14,7 @@ import com.github.naz013.clockapp.adapter.TimeZoneRecyclerAdapter
 import com.github.naz013.clockapp.animation.TextAnimator
 import com.github.naz013.clockapp.animation.TimeAnimator
 import com.github.naz013.clockapp.data.ClockData
-import com.github.naz013.clockapp.data.TimeData
+import com.github.naz013.analoguewatch.TimeData
 import com.github.naz013.clockapp.data.TimeZoneData
 import com.github.naz013.clockapp.databinding.ActivityMainBinding
 import com.github.naz013.clockapp.databinding.DialogSettingsBinding

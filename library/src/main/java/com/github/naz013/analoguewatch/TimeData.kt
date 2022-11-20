@@ -1,4 +1,4 @@
-package com.github.naz013.clockapp.data
+package com.github.naz013.analoguewatch
 
 data class TimeData(
     val hour: Int,

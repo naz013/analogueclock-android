@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="ClockView">
+    <declare-styleable name="AnalogueClockView">
         <attr name="clock_backgroundColor" format="color" />
         <attr name="clock_secondsTickColor" format="color" />
         <attr name="clock_minuteTickColor" format="color" />
@@ -14,6 +14,7 @@
         <attr name="clock_showShadow" format="boolean" />
         <attr name="clock_showHourLabel" format="boolean" />
         <attr name="clock_showInnerCircleBorder" format="boolean" />
+        <attr name="clock_catModeEnabled" format="boolean" />
 
         <attr name="clock_innerCircleSize" format="float" />
         <attr name="clock_hourTickWidth" format="float" />

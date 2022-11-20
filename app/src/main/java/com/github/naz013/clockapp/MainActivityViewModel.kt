@@ -7,7 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.naz013.clockapp.data.ClockData
-import com.github.naz013.clockapp.data.TimeData
+import com.github.naz013.analoguewatch.TimeData
 import com.github.naz013.clockapp.data.TimeZoneData
 import com.github.naz013.clockapp.util.ClocksManager
 import com.github.naz013.clockapp.util.Prefs

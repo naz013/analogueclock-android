@@ -7,7 +7,7 @@ import androidx.core.animation.addListener
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.github.naz013.clockapp.Params
-import com.github.naz013.clockapp.data.TimeData
+import com.github.naz013.analoguewatch.TimeData
 
 class TimeAnimator(
     private val animationListener: (TimeData) -> Unit,

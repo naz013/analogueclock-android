@@ -28,6 +28,20 @@
             android:layout_weight="1" />
 
         <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ui_mode_switch"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="center_horizontal"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_sun"
+            app:tint="@color/theme_switch" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/addButton"
             android:layout_width="56dp"
             android:layout_height="56dp"
@@ -50,8 +64,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:maxLength="100"
             android:ellipsize="marquee"
+            android:maxLength="100"
             android:maxLines="1"
             android:singleLine="true"
             android:textColor="@color/text_tertiary"
@@ -105,34 +119,27 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="48dp">
 
-        <com.github.naz013.clockapp.ClockView
+        <com.github.naz013.analoguewatch.AnalogueClockView
             android:id="@+id/clockView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:clock_backgroundColor="@color/clock_background"
+            app:clock_catModeEnabled="true"
             app:clock_hourTickColor="@color/clock_hour_tick"
             app:clock_hourTickWidth="0.04"
             app:clock_innerCircleColor="@color/clock_pin_circle"
             app:clock_innerCircleSize="0.07"
+            app:clock_labelsColor="@color/theme_switch"
             app:clock_minuteTickColor="@color/clock_minute_tick"
             app:clock_minuteTickWidth="0.03"
             app:clock_pinColor="@color/clock_pin"
             app:clock_secondsTickColor="@color/clock_seconds_tick"
             app:clock_secondsTickWidth="0.003"
             app:clock_shadowColor="@color/clock_shadow"
+            app:clock_showHourLabel="true"
             app:clock_showInnerCircleBorder="@bool/show_inner_circle_border"
             app:clock_showSecondsTick="true"
             app:clock_showShadow="@bool/clock_shadow" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/ui_mode_switch"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="12dp"
-            android:scaleType="centerInside"
-            app:srcCompat="@drawable/ic_sun"
-            app:tint="@color/theme_switch" />
 
     </FrameLayout>
 
