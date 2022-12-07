@@ -29,7 +29,7 @@ allprojects {
 }
 
 dependencies {
-    implementation 'com.github.naz013:analogueclock-android:1.0.1'
+    implementation 'com.github.naz013:analogueclock-android:1.0.3'
 }
 ```
 

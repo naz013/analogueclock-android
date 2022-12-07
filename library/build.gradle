@@ -53,7 +53,7 @@ publishing {
         release(MavenPublication) {
             groupId = 'com.github.naz013'
             artifactId = 'analogueclock-android'
-            version = '1.0.2'
+            version = '1.0.3'
 
             afterEvaluate {
                 from components.release
