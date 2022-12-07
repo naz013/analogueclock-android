@@ -1,5 +1,5 @@
 # Analogue Clock View library for Android
-[![](https://jitpack.io/v/naz013/clock-view.svg)](https://jitpack.io/#naz013/clock-view)
+[![](https://jitpack.io/v/naz013/analogueclock-android.svg)](https://jitpack.io/#naz013/analogueclock-android)
 
 <img src="https://github.com/naz013/analogueclock-android/raw/master/res/icon.png" width="100" alt="Analogue Clock View library for Android">
 
@@ -14,19 +14,22 @@ Screenshot
 
 Sample APP
 --------
-[Google Play](https://play.google.com/store/apps/details?id=com.github.naz013.clockviewlibrary)
+[Google Play](https://play.google.com/store/apps/details?id=com.github.naz013.clockapp)
 
 
 Download
 --------
 Download latest version with Gradle:
 ```groovy
-repositories {
-    maven { url 'https://jitpack.io' }
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
 }
 
 dependencies {
-    implementation 'com.github.naz013:clock-view:1.0.0'
+    implementation 'com.github.naz013:analogueclock-android:1.0.1'
 }
 ```
 
