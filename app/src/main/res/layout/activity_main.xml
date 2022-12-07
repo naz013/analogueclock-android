@@ -17,7 +17,7 @@
             android:id="@+id/settingsButton"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:background="?selectableItemBackground"
+            android:background="?selectableItemBackgroundBorderless"
             android:scaleType="centerInside"
             app:srcCompat="@drawable/ic_settings"
             app:tint="@color/text_secondary" />
@@ -31,10 +31,19 @@
             android:id="@+id/ui_mode_switch"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:layout_gravity="center_horizontal"
+            android:background="?selectableItemBackgroundBorderless"
             android:scaleType="centerInside"
             app:srcCompat="@drawable/ic_sun"
             app:tint="@color/theme_switch" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/catModeSwitch"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_evil_cat" />
 
         <View
             android:layout_width="0dp"
@@ -45,7 +54,7 @@
             android:id="@+id/addButton"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:background="?selectableItemBackground"
+            android:background="?selectableItemBackgroundBorderless"
             android:scaleType="centerInside"
             app:srcCompat="@drawable/ic_add_plus"
             app:tint="@color/theme_switch" />
@@ -124,12 +133,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:clock_backgroundColor="@color/clock_background"
-            app:clock_catModeEnabled="true"
             app:clock_hourTickColor="@color/clock_hour_tick"
-            app:clock_hourTickWidth="0.04"
+            app:clock_hourTickWidth="0.06"
             app:clock_innerCircleColor="@color/clock_pin_circle"
             app:clock_innerCircleSize="0.07"
             app:clock_labelsColor="@color/theme_switch"
+            app:clock_labelsTextSize="18sp"
             app:clock_minuteTickColor="@color/clock_minute_tick"
             app:clock_minuteTickWidth="0.03"
             app:clock_pinColor="@color/clock_pin"

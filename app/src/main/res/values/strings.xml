@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">ClockApp</string>
+    <string name="app_name">Analogue Clock Demo</string>
     <string name="settings">Settings</string>
     <string name="_12_hour_format">12 Hour format</string>
     <string name="time_zones">Time Zones</string>
-    <string name="search">Search...</string>
+    <string name="search">Search…</string>
 </resources>

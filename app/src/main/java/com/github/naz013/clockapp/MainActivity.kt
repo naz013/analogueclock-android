@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity() {
         binding.settingsButton.setOnClickListener { showSettings() }
         binding.addButton.setOnClickListener { viewModel.loadTimeZones() }
         binding.uiModeSwitch.setOnClickListener { viewModel.toggleUiMode() }
+        binding.catModeSwitch.setOnClickListener { viewModel.toggleCatMode() }
 
         binding.clocksList.adapter = adapter
         binding.clocksList.layoutManager =
@@ -61,6 +62,16 @@ class MainActivity : AppCompatActivity() {
         viewModel.clocks.observe(this) { adapter.updateItems(it) }
         viewModel.timeZones.observe(this) { showTimeZonesDialog(it) }
         viewModel.animateClock.observe(this) { updateClock(it) }
+        viewModel.catMode.observe(this) { updateCatMode(it) }
+    }
+
+    private fun updateCatMode(enabled: Boolean) {
+//        binding.clockView.setCatModeEnabled(enabled)
+        if (enabled) {
+            binding.catModeSwitch.setImageResource(R.drawable.ic_evil_cat)
+        } else {
+            binding.catModeSwitch.setImageResource(R.drawable.ic_evil_cat_disabled)
+        }
     }
 
     private fun updateClock(data: TimeData) {

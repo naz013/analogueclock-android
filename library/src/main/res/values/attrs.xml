@@ -14,11 +14,14 @@
         <attr name="clock_showShadow" format="boolean" />
         <attr name="clock_showHourLabel" format="boolean" />
         <attr name="clock_showInnerCircleBorder" format="boolean" />
-        <attr name="clock_catModeEnabled" format="boolean" />
+<!--        <attr name="clock_catModeEnabled" format="boolean" />-->
+        <attr name="clock_showLabelForTick" format="boolean" />
 
         <attr name="clock_innerCircleSize" format="float" />
         <attr name="clock_hourTickWidth" format="float" />
         <attr name="clock_minuteTickWidth" format="float" />
         <attr name="clock_secondsTickWidth" format="float" />
+
+        <attr name="clock_labelsTextSize" format="dimension" />
     </declare-styleable>
 </resources>

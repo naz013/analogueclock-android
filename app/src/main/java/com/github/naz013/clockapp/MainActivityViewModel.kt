@@ -25,6 +25,9 @@ class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
     private val _uiMode = MutableLiveData<Int>()
     val uiMode: LiveData<Int> = _uiMode
 
+    private val _catMode = MutableLiveData<Boolean>()
+    val catMode: LiveData<Boolean> = _catMode
+
     private val _time = MutableLiveData<TimeData>()
     val time: LiveData<TimeData> = _time
 
@@ -42,6 +45,12 @@ class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
 
     private val secondsTimer = ClockTimer(1000L) { updateMainClock() }
     private val minuteTimer = ClockTimer(60000L) { updateClocks() }
+
+    fun toggleCatMode() {
+        val enabled = prefs.isCatModeEnabled()
+        prefs.setCatModeEnabled(!enabled)
+        _catMode.postValue(prefs.isCatModeEnabled())
+    }
 
     fun is12HourFormatEnabled() = prefs.is12HourFormat()
 
@@ -131,6 +140,7 @@ class MainActivityViewModel : ViewModel(), DefaultLifecycleObserver {
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         _uiMode.postValue(uiModeManager.getUiMode())
+        _catMode.postValue(prefs.isCatModeEnabled())
         updateClocks()
     }
 

@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Point
+import android.graphics.PointF
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.util.DisplayMetrics
@@ -33,8 +34,8 @@ class AnalogueClockView constructor(
     private var _params: ClockParams = ClockParams()
 
     private var _clockRect: Rect? = null
-    private val _hourTick: Path = Path()
-    private val _minuteTick: Path = Path()
+    private var _hourTick: Tick? = null
+    private var _minuteTick: Tick? = null
     private val _secondTick: Path = Path()
     private val _labelPoints: Array<Point?> = arrayOfNulls(4)
     private var _innerCircleRadius: Float = 5f
@@ -62,6 +63,15 @@ class AnalogueClockView constructor(
         0
     )
 
+//    fun setCatModeEnabled(enabled: Boolean) {
+//        _params = _params.copy(catModeEnabled = enabled)
+//        createMinuteTick()
+//        createHourTick()
+//        this.invalidate()
+//    }
+
+//    fun isCatModeEnabled(): Boolean = _params.catModeEnabled
+
     fun getTime(): TimeData {
         return TimeData(_time.hour, _time.minute, _time.second)
     }
@@ -73,11 +83,15 @@ class AnalogueClockView constructor(
 
     private fun initView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) {
         initTime(System.currentTimeMillis())
-        val textSize = 25f
 
         if (attrs != null && context != null) {
             val a: TypedArray =
-                context.theme.obtainStyledAttributes(attrs, R.styleable.AnalogueClockView, defStyleAttr, 0)
+                context.theme.obtainStyledAttributes(
+                    attrs,
+                    R.styleable.AnalogueClockView,
+                    defStyleAttr,
+                    0
+                )
             try {
                 _params = _params.copy(
                     showHourLabels = a.getBoolean(
@@ -92,13 +106,17 @@ class AnalogueClockView constructor(
                         R.styleable.AnalogueClockView_clock_showShadow,
                         _params.showShadow
                     ),
-                    catModeEnabled = a.getBoolean(
-                        R.styleable.AnalogueClockView_clock_catModeEnabled,
-                        _params.catModeEnabled
-                    ),
+//                    catModeEnabled = a.getBoolean(
+//                        R.styleable.AnalogueClockView_clock_catModeEnabled,
+//                        _params.catModeEnabled
+//                    ),
                     showInnerCircleBorder = a.getBoolean(
                         R.styleable.AnalogueClockView_clock_showInnerCircleBorder,
                         _params.showInnerCircleBorder
+                    ),
+                    showLabelForTick = a.getBoolean(
+                        R.styleable.AnalogueClockView_clock_showLabelForTick,
+                        _params.showLabelForTick
                     ),
                     pinCircleSize = a.getFloat(
                         R.styleable.AnalogueClockView_clock_innerCircleSize,
@@ -115,6 +133,10 @@ class AnalogueClockView constructor(
                     hourTickWidth = a.getFloat(
                         R.styleable.AnalogueClockView_clock_hourTickWidth,
                         _params.hourTickWidth
+                    ),
+                    labelTextSize = a.getDimension(
+                        R.styleable.AnalogueClockView_clock_labelsTextSize,
+                        _params.labelTextSize
                     )
                 )
 
@@ -123,7 +145,10 @@ class AnalogueClockView constructor(
                         R.styleable.AnalogueClockView_clock_backgroundColor,
                         _colors.clockColor
                     ),
-                    pinColor = a.getColor(R.styleable.AnalogueClockView_clock_pinColor, _colors.pinColor),
+                    pinColor = a.getColor(
+                        R.styleable.AnalogueClockView_clock_pinColor,
+                        _colors.pinColor
+                    ),
                     innerCircleColor = a.getColor(
                         R.styleable.AnalogueClockView_clock_innerCircleColor,
                         _colors.innerCircleColor
@@ -169,7 +194,7 @@ class AnalogueClockView constructor(
 
         _labelPaint.isAntiAlias = true
         _labelPaint.style = Paint.Style.FILL_AND_STROKE
-        _labelPaint.textSize = textSize
+        _labelPaint.textSize = _params.labelTextSize
 
         _backgroundPaint.isAntiAlias = true
         _backgroundPaint.style = Paint.Style.FILL
@@ -255,23 +280,23 @@ class AnalogueClockView constructor(
     }
 
     private fun drawMinuteArrow(canvas: Canvas) {
-        _clockRect?.takeIf { !_minuteTick.isEmpty }
+        _clockRect?.takeIf { _minuteTick != null }
             ?.also { rect ->
                 canvas.save()
                 canvas.rotate(minuteAngle(), rect.centerXf(), rect.centerYf())
-                _tickPaint.color = _colors.minuteTickColor
-                canvas.drawPath(_minuteTick, _tickPaint)
+                _hourTick?.updateColors(_colors.minuteTickColor, _colors.clockColor)
+                _minuteTick?.draw(canvas)
                 canvas.restore()
             }
     }
 
     private fun drawHourArrow(canvas: Canvas) {
-        _clockRect?.takeIf { !_hourTick.isEmpty }
+        _clockRect?.takeIf { _hourTick != null }
             ?.also { rect ->
                 canvas.save()
                 canvas.rotate(hourAngle(), rect.centerXf(), rect.centerYf())
-                _tickPaint.color = _colors.hourTickColor
-                canvas.drawPath(_hourTick, _tickPaint)
+                _hourTick?.updateColors(_colors.hourTickColor, _colors.clockColor)
+                _hourTick?.draw(canvas)
                 canvas.restore()
             }
     }
@@ -367,7 +392,6 @@ class AnalogueClockView constructor(
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val measuredWidth = measuredWidth
         setMeasuredDimension(measuredWidth, measuredWidth)
-        log("onMeasure: width=$measuredWidth, height=$measuredHeight")
         processCalculations(measuredWidth)
     }
 
@@ -388,14 +412,9 @@ class AnalogueClockView constructor(
         _labelPoints[3] =
             circlePoint(clockRect.centerX(), clockRect.centerY(), mLabelLength, 180f)
 
-        val mHourArrowWidth = clockRect.widthF() * _params.hourTickWidth
-        val mHourArrowLength = clockRect.widthF() / 2f * HOUR_ARROW_LENGTH
-
-        val mMinuteArrowWidth = clockRect.widthF() * _params.minuteTickWidth
-        val mMinuteArrowLength = clockRect.widthF() / 2f * MINUTE_ARROW_LENGTH
-
         val mSecondArrowWidth = clockRect.widthF() * _params.secondTickWidth
         val mSecondArrowLength = clockRect.widthF() / 2f * SECOND_ARROW_LENGTH
+
         create(
             _secondTick,
             clockRect.centerXf(),
@@ -403,20 +422,60 @@ class AnalogueClockView constructor(
             mSecondArrowWidth,
             mSecondArrowLength
         )
-        create(
-            _minuteTick,
-            clockRect.centerXf(),
-            clockRect.centerYf(),
-            mMinuteArrowWidth,
-            mMinuteArrowLength
-        )
-        create(
-            _hourTick,
-            clockRect.centerXf(),
-            clockRect.centerYf(),
-            mHourArrowWidth,
-            mHourArrowLength
-        )
+        createMinuteTick()
+        createHourTick()
+    }
+
+    private fun createHourTick() {
+        val clockRect = _clockRect ?: return
+
+        val mHourArrowWidth = clockRect.widthF() * _params.hourTickWidth
+        val mHourArrowLength = clockRect.widthF() / 2f * HOUR_ARROW_LENGTH
+
+        _hourTick = if (_params.catModeEnabled) {
+            PawTick(
+                clockRect.centerXf(),
+                clockRect.centerYf(),
+                mHourArrowWidth,
+                mHourArrowLength,
+                _colors.hourTickColor,
+                _colors.clockColor
+            )
+        } else {
+            RectangleTick(
+                clockRect.centerXf(),
+                clockRect.centerYf(),
+                mHourArrowWidth,
+                mHourArrowLength,
+                _colors.hourTickColor
+            )
+        }
+    }
+
+    private fun createMinuteTick() {
+        val clockRect = _clockRect ?: return
+
+        val mMinuteArrowWidth = clockRect.widthF() * _params.minuteTickWidth
+        val mMinuteArrowLength = clockRect.widthF() / 2f * MINUTE_ARROW_LENGTH
+
+        _minuteTick = if (_params.catModeEnabled) {
+            PawTick(
+                clockRect.centerXf(),
+                clockRect.centerYf(),
+                mMinuteArrowWidth,
+                mMinuteArrowLength,
+                _colors.minuteTickColor,
+                _colors.clockColor
+            )
+        } else {
+            RectangleTick(
+                clockRect.centerXf(),
+                clockRect.centerYf(),
+                mMinuteArrowWidth,
+                mMinuteArrowLength,
+                _colors.minuteTickColor
+            )
+        }
     }
 
     private fun create(path: Path, cx: Float, cy: Float, width: Float, length: Float) {
@@ -461,6 +520,7 @@ class AnalogueClockView constructor(
 
     internal data class ClockParams(
         val showHourLabels: Boolean = false,
+        val showLabelForTick: Boolean = false,
         val showShadow: Boolean = false,
         val showSecondsTick: Boolean = true,
         val showInnerCircleBorder: Boolean = true,
@@ -468,7 +528,8 @@ class AnalogueClockView constructor(
         val pinCircleSize: Float = 0.07f, // 0.05 - 0.15
         val hourTickWidth: Float = 0.04f, // 0.035 - 0.045
         val minuteTickWidth: Float = 0.03f, // 0.01 - 0.03
-        val secondTickWidth: Float = 0.003f // 0.001 - 0.008
+        val secondTickWidth: Float = 0.003f, // 0.001 - 0.008
+        val labelTextSize: Float = 25f
     )
 
     internal data class ClockColors(
@@ -488,6 +549,155 @@ class AnalogueClockView constructor(
         val second: Int = 0
     )
 
+    internal class PawTick(
+        private val cx: Float,
+        private val cy: Float,
+        private val width: Float,
+        private val length: Float,
+        private val primaryColor: Int,
+        private val secondaryColor: Int
+    ) : Tick {
+
+        private val catPawPath = createCatPawPath()
+        private val primaryPath: Path = createPrimaryPath()
+
+        private val secondaryPaint: Paint = Paint().apply {
+            color = secondaryColor
+            isAntiAlias = true
+            style = Paint.Style.STROKE
+            strokeWidth = 3f
+        }
+        private val primaryPaint: Paint = Paint().apply {
+            color = primaryColor
+            isAntiAlias = true
+            style = Paint.Style.FILL
+        }
+
+        override fun draw(canvas: Canvas) {
+            canvas.drawPath(primaryPath, primaryPaint)
+//            canvas.drawPath(catPawPath, secondaryPaint)
+        }
+
+        private fun createCatPawPath(): Path {
+            // paw pillows circles
+
+            return Path().apply {
+                reset()
+
+                close()
+            }
+        }
+
+        private fun createPrimaryPath(): Path {
+            // solid part of paw
+            val a = length * 0.8f
+            val b = length * 0.95f
+            val c = length * 0.97f
+            val d = length * 0.99f
+
+            val z = width / 2f
+            val f = z * 0.9f
+            val g = width / 5f
+
+            val path = Path()
+
+            val p0 = PointF(cx, cy)
+            path.moveTo(p0)
+
+            val p1 = PointF(cx, cy - z)
+            path.lineTo(p1)
+
+            val p2 = PointF(cx + a, cy - f)
+            path.lineTo(p2)
+
+            val p3 = PointF(cx + b, cy - z)
+            path.lineTo(p3)
+
+            val p4 = PointF(cx + c, cy - z + g)
+            val p4Curve = PointF(
+                p4.x,
+                (p3.y + p4.y) / 2f
+            )
+
+            path.cubicTo(p3, p4Curve, p4)
+
+            val p5 = PointF(cx + d, cy - z + (2f * g))
+            val p5Curve = PointF(
+                p5.x,
+                (p4.y + p5.y) / 2f
+            )
+
+            path.cubicTo(p4, p5Curve, p5)
+
+            val p6 = PointF(cx + c, cy + z - g)
+            val p6Curve = PointF(
+                p5.x,
+                (p5.y + p6.y) / 2f
+            )
+
+            path.cubicTo(p5, p6Curve, p6)
+
+            val p7 = PointF(cx + b, cy + z)
+            val p7Curve = PointF(
+                p6.x,
+                (p6.y + p7.y) / 2f
+            )
+
+            path.cubicTo(p6, p7Curve, p7)
+
+            val p8 = PointF(cx + a, cy + f)
+            path.lineTo(p8)
+
+            val p9 = PointF(cx, cy + z)
+            path.lineTo(p9)
+
+            path.lineTo(p0)
+
+            return path
+        }
+
+        override fun updateColors(primaryColor: Int, secondaryColor: Int) {
+            primaryPaint.color = primaryColor
+            secondaryPaint.color = secondaryColor
+        }
+    }
+
+    internal class RectangleTick(
+        private val cx: Float,
+        private val cy: Float,
+        private val width: Float,
+        private val length: Float,
+        private val primaryColor: Int
+    ) : Tick {
+
+        private val primaryPath: Path = Path().apply {
+            reset()
+            moveTo(cx + length, cy - width / 2f) // top right
+            lineTo(cx + length, cy + width / 2f) // bottom right
+            lineTo(cx, cy + width / 2f) // bottom left
+            lineTo(cx, cy - width / 2f) // top left
+            close()
+        }
+        private val primaryPaint: Paint = Paint().apply {
+            color = primaryColor
+            isAntiAlias = true
+            style = Paint.Style.FILL
+        }
+
+        override fun draw(canvas: Canvas) {
+            canvas.drawPath(primaryPath, primaryPaint)
+        }
+
+        override fun updateColors(primaryColor: Int, secondaryColor: Int) {
+            primaryPaint.color = primaryColor
+        }
+    }
+
+    internal interface Tick {
+        fun draw(canvas: Canvas)
+        fun updateColors(primaryColor: Int, secondaryColor: Int)
+    }
+
     companion object {
         private const val TAG = "ClockView"
         private const val SHADOW_RADIUS = 15
@@ -495,4 +705,16 @@ class AnalogueClockView constructor(
         private const val MINUTE_ARROW_LENGTH = 0.75f
         private const val SECOND_ARROW_LENGTH = 0.80f
     }
+}
+
+private fun Path.cubicTo(p1: PointF, p2: PointF, p3: PointF) {
+    this.cubicTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y)
+}
+
+private fun Path.lineTo(p: PointF) {
+    this.lineTo(p.x, p.y)
+}
+
+private fun Path.moveTo(p: PointF) {
+    this.moveTo(p.x, p.y)
 }
