@@ -10,13 +10,10 @@ Inspired by this work - [UpLabs](https://www.uplabs.com/posts/ios-clock-app-ligh
 
 Screenshot
 
-<img src="https://github.com/naz013/analogueclock-android/raw/master/res/scr_1.png" width="400" alt="Screenshot">
-<img src="https://github.com/naz013/analogueclock-android/raw/master/res/scr_2.png" width="400" alt="Screenshot">
+<img src="https://github.com/naz013/analogueclock-android/raw/master/res/scr_1.png" width="200" alt="Screenshot"> <img src="https://github.com/naz013/analogueclock-android/raw/master/res/scr_2.png" width="200" alt="Screenshot">
 
 Sample APP
 --------
-[Download](https://github.com/naz013/analogueclock-android/raw/master/app/release/app-release.apk)
-
 [Google Play](https://play.google.com/store/apps/details?id=com.github.naz013.clockviewlibrary)
 
 
