@@ -1,7 +1,7 @@
 # Analogue Clock View library for Android
 [![](https://jitpack.io/v/naz013/clock-view.svg)](https://jitpack.io/#naz013/clock-view)
 
-<img src="https://github.com/naz013/analogueclock-android/raw/master/app/src/main/ic_launcher-web.png" width="100" alt="Analogue Clock View library for Android">
+<img src="https://github.com/naz013/analogueclock-android/raw/master/res/icon.png" width="100" alt="Analogue Clock View library for Android">
 
 Simple analog clock view library for Android.
 
@@ -10,8 +10,8 @@ Inspired by this work - [UpLabs](https://www.uplabs.com/posts/ios-clock-app-ligh
 
 Screenshot
 
-<img src="https://github.com/naz013/clock-view/raw/master/res/scr_1.png" width="400" alt="Screenshot">
-<img src="https://github.com/naz013/clock-view/raw/master/res/scr_2.png" width="400" alt="Screenshot">
+<img src="https://github.com/naz013/analogueclock-android/raw/master/res/scr_1.png" width="400" alt="Screenshot">
+<img src="https://github.com/naz013/analogueclock-android/raw/master/res/scr_2.png" width="400" alt="Screenshot">
 
 Sample APP
 --------
